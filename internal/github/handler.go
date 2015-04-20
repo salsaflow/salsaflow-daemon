@@ -10,6 +10,7 @@ import (
 
 	// Vendor
 	"github.com/codegangsta/negroni"
+	"github.com/google/go-github/github"
 )
 
 type Handler struct {
@@ -35,16 +36,12 @@ func NewHandler(options ...OptionFunc) http.Handler {
 		opt(handler)
 	}
 
-	// Set up routing.
-	mux := http.NewServeMux()
-	mux.HandleFunc("/issues", handler.handleIssueEvent)
-
 	// Set up the middleware chain.
 	n := negroni.New()
 	if handler.secret != "" {
 		n.Use(newSecretMiddleware(handler.secret))
 	}
-	n.UseHandler(mux)
+	n.UseHandlerFunc(handler.handleEvent)
 
 	// Set the Negroni instance to be THE handler.
 	handler.Handler = n
@@ -53,7 +50,23 @@ func NewHandler(options ...OptionFunc) http.Handler {
 	return handler
 }
 
-func (handler *Handler) handleIssueEvent(rw http.ResponseWriter, r *http.Request) {
+type IssueEvent struct {
+	Action string        `json:"action"`
+	Issue  *github.Issue `json:"issue"`
+	Label  *github.Label `json:"label,omitempty"`
+}
+
+func (handler *Handler) handleEvent(rw http.ResponseWriter, r *http.Request) {
+	eventType := r.Header.Get("X-Github-Event")
+	switch eventType {
+	case "issues":
+		handler.handleIssuesEvent(rw, r)
+	default:
+		httpStatus(rw, http.StatusAccepted)
+	}
+}
+
+func (handler *Handler) handleIssuesEvent(rw http.ResponseWriter, r *http.Request) {
 
 }
 
@@ -64,7 +77,7 @@ func newSecretMiddleware(secret string) negroni.HandlerFunc {
 			mac := hmac.New(sha1.New, []byte(secret))
 			if _, err := io.Copy(mac, r.Body); err != nil {
 				log.Printf("ERROR in %v: %v\n", r.URL.Path, err)
-				http.Error(rw, "Internal Server Error", http.StatusInternalServerError)
+				httpStatus(rw, http.StatusInternalServerError)
 				return
 			}
 
@@ -74,11 +87,15 @@ func newSecretMiddleware(secret string) negroni.HandlerFunc {
 			if !hmac.Equal(expected, []byte(secretHeader)) {
 				log.Printf("WARNING in %v: HMAC mismatch detected: expected=%v, got=%v",
 					r.URL.Path, string(expected), secretHeader)
-				http.Error(rw, "Unauthorized", http.StatusUnauthorized)
+				httpStatus(rw, http.StatusUnauthorized)
 				return
 			}
 
 			// Call the next handler.
 			next(rw, r)
 		})
+}
+
+func httpStatus(rw http.ResponseWriter, status int) {
+	http.Error(rw, http.StatusText(status), status)
 }
