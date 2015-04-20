@@ -145,7 +145,7 @@ func newSecretMiddleware(secret string) negroni.HandlerFunc {
 }
 
 const (
-	trackerIdTag = "SF-Issue-Tracker-Id"
+	trackerIdTag = "SF-Issue-Tracker"
 	projectIdTag = "SF-Project-Id"
 	storyIdTag   = "SF-Story-Id"
 )
