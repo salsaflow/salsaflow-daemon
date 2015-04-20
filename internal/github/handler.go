@@ -75,6 +75,7 @@ func (handler *Handler) handleIssuesEvent(rw http.ResponseWriter, r *http.Reques
 	// Parse the payload.
 	var event github.IssueActivityEvent
 	if err := json.NewDecoder(r.Body).Decode(&event); err != nil {
+		log.Printf("WARNING in %v: failed to parse event: %v\n", r.URL.Path, err)
 		httpStatus(rw, http.StatusBadRequest)
 		return
 	}
