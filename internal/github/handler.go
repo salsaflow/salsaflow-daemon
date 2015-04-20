@@ -35,14 +35,15 @@ func NewHandler(options ...OptionFunc) http.Handler {
 		opt(handler)
 	}
 
-	// Set up shared middleware.
+	// Set up routing.
+	mux := http.NewServeMux()
+	mux.HandleFunc("/issues", handler.handleIssueEvent)
+
+	// Set up the middleware chain.
 	n := negroni.New()
 	if handler.secret != "" {
 		n.Use(newSecretMiddleware(handler.secret))
 	}
-
-	// Set up routing.
-	mux := http.NewServeMux()
 	n.UseHandler(mux)
 
 	// Set the Negroni instance to be THE handler.
@@ -50,6 +51,10 @@ func NewHandler(options ...OptionFunc) http.Handler {
 
 	// Return the new handler.
 	return handler
+}
+
+func (handler *Handler) handleIssueEvent(rw http.ResponseWriter, r *http.Request) {
+
 }
 
 func newSecretMiddleware(secret string) negroni.HandlerFunc {
