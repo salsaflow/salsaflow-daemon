@@ -4,6 +4,8 @@ import (
 	// Stdlib
 	"crypto/hmac"
 	"crypto/sha1"
+	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -50,12 +52,6 @@ func NewHandler(options ...OptionFunc) http.Handler {
 	return handler
 }
 
-type IssueEvent struct {
-	Action string        `json:"action"`
-	Issue  *github.Issue `json:"issue"`
-	Label  *github.Label `json:"label,omitempty"`
-}
-
 func (handler *Handler) handleEvent(rw http.ResponseWriter, r *http.Request) {
 	eventType := r.Header.Get("X-Github-Event")
 	switch eventType {
@@ -67,7 +63,12 @@ func (handler *Handler) handleEvent(rw http.ResponseWriter, r *http.Request) {
 }
 
 func (handler *Handler) handleIssuesEvent(rw http.ResponseWriter, r *http.Request) {
+	var event github.IssueActivityEvent
+	if err := json.NewDecoder(r.Body).Decode(&event); err != nil {
+		httpStatus(rw, http.StatusBadRequest)
+	}
 
+	fmt.Println("Accepted issues event for", *event.Issue.HTMLURL)
 }
 
 func newSecretMiddleware(secret string) negroni.HandlerFunc {
