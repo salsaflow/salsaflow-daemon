@@ -3,12 +3,14 @@ package github
 import (
 	// Stdlib
 	"bufio"
+	"bytes"
 	"crypto/hmac"
 	"crypto/sha1"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"regexp"
@@ -122,9 +124,21 @@ func (handler *Handler) handleIssuesEvent(rw http.ResponseWriter, r *http.Reques
 func newSecretMiddleware(secret string) negroni.HandlerFunc {
 	return negroni.HandlerFunc(
 		func(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+			// Read the request body into a buffer.
+			bodyBytes, err := ioutil.ReadAll(r.Body)
+			if err != nil {
+				log.Printf("ERROR in %v: %v\n", r.URL.Path, err)
+				httpStatus(rw, http.StatusInternalServerError)
+				return
+			}
+
+			// Fill the request body again so that it is available in the next handler.
+			r.Body.Close()
+			r.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+
 			// Compute the hash.
 			mac := hmac.New(sha1.New, []byte(secret))
-			if _, err := io.Copy(mac, r.Body); err != nil {
+			if _, err := io.Copy(mac, bytes.NewReader(bodyBytes)); err != nil {
 				log.Printf("ERROR in %v: %v\n", r.URL.Path, err)
 				httpStatus(rw, http.StatusInternalServerError)
 				return
