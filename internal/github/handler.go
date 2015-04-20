@@ -64,10 +64,11 @@ func newSecretMiddleware(secret string) negroni.HandlerFunc {
 			}
 
 			// Compare with the header provided in the request.
-			got := []byte(r.Header.Get("X-Hub-Signature"))
+			secretHeader := r.Header.Get("X-Hub-Signature")
 			expected := mac.Sum(nil)
-			if !hmac.Equal(got, expected) {
-				log.Printf("WARNING in %v: HMAC mismatch detected", r.URL.Path)
+			if !hmac.Equal(expected, []byte(secretHeader)) {
+				log.Printf("WARNING in %v: HMAC mismatch detected: expected=%v, got=%v",
+					r.URL.Path, string(expected), secretHeader)
 				http.Error(rw, "Unauthorized", http.StatusUnauthorized)
 				return
 			}

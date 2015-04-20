@@ -3,6 +3,7 @@ package main
 import (
 	// Stdlib
 	"net/http"
+	"os"
 
 	// Internal
 	"github.com/tchap/salsaflow-daemon/internal/github"
@@ -20,7 +21,7 @@ func main() {
 	if secret := os.Getenv("GITHUB_SECRET"); secret != "" {
 		githubOptions = append(githubOptions, github.SetSecret(secret))
 	}
-	mux.Handle("/events/github", github.NewHandler(githubOptions...)
+	mux.Handle("/events/github", github.NewHandler(githubOptions...))
 
 	// Set up Negroni and start listening.
 	n := negroni.Classic()
