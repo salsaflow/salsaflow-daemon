@@ -1,0 +1,34 @@
+{
+	"ImportPath": "github.com/tchap/salsaflow-daemon",
+	"GoVersion": "go1.4.2",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/codegangsta/negroni",
+			"Comment": "v0.1-70-gc7477ad",
+			"Rev": "c7477ad8e330bef55bf1ebe300cf8aa67c492d1b"
+		},
+		{
+			"ImportPath": "github.com/google/go-github/github",
+			"Rev": "6f7d3a5ad94d7a8c1cf7cb93d1364d0369ea8bbd"
+		},
+		{
+			"ImportPath": "github.com/google/go-querystring/query",
+			"Rev": "547ef5ac979778feb2f760cdb5f4eae1a2207b86"
+		},
+		{
+			"ImportPath": "github.com/salsita/go-jira/v2/jira",
+			"Rev": "5f0c623565cdc9d2644e56bfc90a84d7146601ae"
+		},
+		{
+			"ImportPath": "github.com/salsita/go-pivotaltracker/v5/pivotal",
+			"Rev": "295a0a2e0ac5870c6fc8aa7b00d4957e3912410b"
+		},
+		{
+			"ImportPath": "github.com/tchap/oauth",
+			"Rev": "d1214b4ac4b16fedaf83df0732fe80be9683bd96"
+		}
+	]
+}
