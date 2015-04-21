@@ -14,7 +14,11 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
+
+	// Internal
+	"github.com/tchap/salsaflow-daemon/internal/trackers"
 
 	// Vendor
 	"github.com/codegangsta/negroni"
@@ -96,6 +100,16 @@ func (handler *Handler) handleIssuesEvent(rw http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	// Do nothing unless this is an opened, closed or reopened event.
+	switch *event.Action {
+	case "opened":
+	case "closed":
+	case "reopened":
+	default:
+		httpStatus(rw, http.StatusAccepted)
+		return
+	}
+
 	// Parse issue body.
 	body, err := parseIssueBody(*issue.Body)
 	if err != nil {
@@ -104,21 +118,46 @@ func (handler *Handler) handleIssuesEvent(rw http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	// Do nothing unless this is opened, closed or reopened event.
+	log.Printf("Issue being handled: %#v\n", body)
+
+	// Instantiate the issue tracker.
+	tracker, err := trackers.GetIssueTracker(body.TrackerId)
+	if err != nil {
+		log.Printf("WARNING in %v: %v\n", r.URL.Path, err)
+		httpStatus(rw, statusUnprocessableEntity)
+		return
+	}
+
+	// Find relevant story.
+	story, err := tracker.FindStoryById(body.ProjectId, body.StoryId)
+	if err != nil {
+		log.Printf("WARNING in %v: story not found: %v\n", r.URL.Path, err)
+		httpStatus(rw, statusUnprocessableEntity)
+		return
+	}
+
+	// Invoke relevant event handler.
+	var (
+		issueNum = strconv.Itoa(*issue.Number)
+		issueURL = *issue.HTMLURL
+		ex       error
+	)
 	switch *event.Action {
 	case "opened":
-		//handleIssueOpened(rw, r, issue, body)
-		fallthrough
+		ex = story.OnReviewRequestOpened(issueNum, issueURL)
 	case "closed":
-		//handleIssueClosed(rw, r, issue, body)
-		fallthrough
+		ex = story.OnReviewRequestClosed(issueNum, issueURL)
 	case "reopened":
-		//handleIssueReopened(rw, r, issue, body)
-		fallthrough
+		ex = story.OnReviewRequestReopened(issueNum, issueURL)
 	default:
-		fmt.Printf("Accepted issue event, body = %#v\n", body)
-		httpStatus(rw, http.StatusAccepted)
+		panic("unreachable code reached")
 	}
+	if ex != nil {
+		log.Printf("WARNING in %v: event handler failed: %v\n", r.URL.Path, ex)
+		httpStatus(rw, http.StatusInternalServerError)
+		return
+	}
+	httpStatus(rw, http.StatusAccepted)
 }
 
 func newSecretMiddleware(secret string) negroni.HandlerFunc {
