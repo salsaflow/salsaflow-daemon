@@ -6,7 +6,7 @@ import (
 	"os"
 
 	// Internal
-	"github.com/tchap/salsaflow-daemon/internal/github"
+	"github.com/tchap/salsaflow-daemon/internal/handlers/github"
 
 	// Vendor
 	"github.com/codegangsta/negroni"
