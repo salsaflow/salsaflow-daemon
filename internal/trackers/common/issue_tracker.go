@@ -20,4 +20,8 @@ type Story interface {
 
 	// OnReviewRequestReopened is called to handle the RR reopened event.
 	OnReviewRequestReopened(rrID, rrURL string) error
+
+	// MarkAsReviewed can be used to mark the story as reviewed when
+	// that information cannot be deduced from other events.
+	MarkAsReviewed() error
 }
