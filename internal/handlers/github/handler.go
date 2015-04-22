@@ -129,7 +129,7 @@ func (handler *Handler) handleIssuesEvent(rw http.ResponseWriter, r *http.Reques
 	}
 
 	// Find relevant story.
-	story, err := tracker.FindStoryById(body.ProjectId, body.StoryId)
+	story, err := tracker.FindStoryByTag(body.StoryId)
 	if err != nil {
 		log.Printf("WARNING in %v: story not found: %v\n", r.URL.Path, err)
 		httpStatus(rw, statusUnprocessableEntity)
@@ -209,19 +209,16 @@ func newSecretMiddleware(secret string) negroni.HandlerFunc {
 
 const (
 	trackerIdTag = "SF-Issue-Tracker"
-	projectIdTag = "SF-Project-Id"
 	storyIdTag   = "SF-Story-Id"
 )
 
 var (
 	trackerIdRegexp = regexp.MustCompile(fmt.Sprintf("^%v: (.+)$", trackerIdTag))
-	projectIdRegexp = regexp.MustCompile(fmt.Sprintf("^%v: (.+)$", projectIdTag))
 	storyIdRegexp   = regexp.MustCompile(fmt.Sprintf("^%v: (.+)$", storyIdTag))
 )
 
 type issueBody struct {
 	TrackerId string
-	ProjectId string
 	StoryId   string
 }
 
@@ -234,12 +231,6 @@ func parseIssueBody(content string) (*issueBody, error) {
 		match := trackerIdRegexp.FindStringSubmatch(line)
 		if len(match) == 2 {
 			body.TrackerId = match[1]
-			continue
-		}
-
-		match = projectIdRegexp.FindStringSubmatch(line)
-		if len(match) == 2 {
-			body.ProjectId = match[1]
 			continue
 		}
 
@@ -256,8 +247,6 @@ func parseIssueBody(content string) (*issueBody, error) {
 	switch {
 	case body.TrackerId == "":
 		return nil, fmt.Errorf("parseIssueBody: %v tag not found", trackerIdTag)
-	case body.ProjectId == "":
-		return nil, fmt.Errorf("parseIssueBody: %v tag not found", projectIdTag)
 	case body.StoryId == "":
 		return nil, fmt.Errorf("parseIssueBody: %v tag not found", storyIdTag)
 	}

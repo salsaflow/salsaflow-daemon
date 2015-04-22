@@ -2,9 +2,10 @@ package pivotaltracker
 
 import (
 	// Stdlib
+	"fmt"
 	"os"
 	"strconv"
-	"fmt"
+	"strings"
 
 	// Internal
 	"github.com/tchap/salsaflow-daemon/internal/trackers/common"
@@ -25,15 +26,10 @@ type issueTracker struct {
 	client *pivotal.Client
 }
 
-func (tracker *issueTracker) FindStoryById(projectId, storyId string) (common.Story, error) {
-	pid, err := strconv.Atoi(projectId)
+func (tracker *issueTracker) FindStoryByTag(storyTag string) (common.Story, error) {
+	pid, sid, err := parseStoryTag(storyTag)
 	if err != nil {
-		return nil, fmt.Errorf("not a valid Pivotal Tracker project ID: %v", projectId)
-	}
-
-	sid, err := strconv.Atoi(storyId)
-	if err != nil {
-		return nil, fmt.Errorf("not a valid Pivotal Tracker story ID: %v", storyId)
+		return nil, err
 	}
 
 	story, _, err := tracker.client.Stories.Get(pid, sid)
@@ -42,4 +38,25 @@ func (tracker *issueTracker) FindStoryById(projectId, storyId string) (common.St
 	}
 
 	return &commonStory{tracker.client, story}, nil
+}
+
+func parseStoryTag(storyTag string) (pid, sid int, err error) {
+	parts := strings.Split(storyTag, "/")
+	if len(parts) != 3 {
+		return 0, 0, fmt.Errorf("Pivotal Tracker: malformed story tag: %v", storyTag)
+	}
+
+	pidString := parts[0]
+	pid, err = strconv.Atoi(pidString)
+	if err != nil {
+		return 0, 0, fmt.Errorf("Pivotal Tracker: malformed project ID: %v", pidString)
+	}
+
+	sidString := parts[2]
+	sid, err = strconv.Atoi(sidString)
+	if err != nil {
+		return 0, 0, fmt.Errorf("Pivotal Tracker: malformed story ID: %v", sidString)
+	}
+
+	return pid, sid, nil
 }

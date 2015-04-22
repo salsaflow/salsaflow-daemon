@@ -4,8 +4,8 @@ package common
 // all modules representing an issue tracker.
 type IssueTracker interface {
 
-	// FindStoryById can be used to find a story by its ID.
-	FindStoryById(projectId, storyId string) (Story, error)
+	// FindStoryByTag can be used to find a story by its tag.
+	FindStoryByTag(storyTag string) (Story, error)
 }
 
 // Story represents a common interface for issue tracker stories.
