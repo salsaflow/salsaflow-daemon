@@ -157,6 +157,15 @@ func (handler *Handler) handleIssuesEvent(rw http.ResponseWriter, r *http.Reques
 		httpStatus(rw, http.StatusInternalServerError)
 		return
 	}
+
+	if *event.Action == "closed" {
+		if err := story.MarkAsReviewed(); err != nil {
+			log.Printf("WARNING in %v: failed to mark story as reviewed: %v\n", r.URL.Path, err)
+			httpStatus(rw, http.StatusInternalServerError)
+			return
+		}
+	}
+
 	httpStatus(rw, http.StatusAccepted)
 }
 
