@@ -17,6 +17,10 @@
 		{
 			"ImportPath": "github.com/google/go-querystring/query",
 			"Rev": "d8840cbb2baa915f4836edda4750050a2c0b7aea"
+		},
+		{
+			"ImportPath": "github.com/salsita/go-pivotaltracker/v5/pivotal",
+			"Rev": "295a0a2e0ac5870c6fc8aa7b00d4957e3912410b"
 		}
 	]
 }

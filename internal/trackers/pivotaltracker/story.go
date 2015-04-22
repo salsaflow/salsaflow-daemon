@@ -1,6 +1,9 @@
 package pivotaltracker
 
 import (
+	// Stdlib
+	"fmt"
+
 	// Vendor
 	"github.com/salsita/go-pivotaltracker/v5/pivotal"
 )
@@ -28,7 +31,7 @@ func (s *commonStory) MarkAsReviewed() error {
 		Labels: append(s.story.Labels, &pivotal.Label{Name: "reviewed"}),
 	}
 
-	_, _, err := s.client.Stories.Update(s.story.ProjectId, s.story.StoryId, req)
+	story, _, err := s.client.Stories.Update(s.story.ProjectId, s.story.Id, req)
 	if err != nil {
 		return err
 	}
@@ -42,7 +45,7 @@ func (s *commonStory) addComment(text string) error {
 		pid = s.story.ProjectId
 		sid = s.story.Id
 	)
-	comment, _, err := client.Stories.AddComment(pid, sid, &client.StoryComment{
+	comment, _, err := s.client.Stories.AddComment(pid, sid, &pivotal.Comment{
 		Text: text,
 	})
 	if err != nil {
@@ -50,5 +53,5 @@ func (s *commonStory) addComment(text string) error {
 	}
 
 	s.story.CommentIds = append(s.story.CommentIds, comment.Id)
-	return
+	return nil
 }

@@ -1,6 +1,11 @@
 package pivotaltracker
 
 import (
+	// Stdlib
+	"os"
+	"strconv"
+	"fmt"
+
 	// Internal
 	"github.com/tchap/salsaflow-daemon/internal/trackers/common"
 
@@ -31,10 +36,10 @@ func (tracker *issueTracker) FindStoryById(projectId, storyId string) (common.St
 		return nil, fmt.Errorf("not a valid Pivotal Tracker story ID: %v", storyId)
 	}
 
-	story, _, err := client.Stories.Get(pid, sid)
+	story, _, err := tracker.client.Stories.Get(pid, sid)
 	if err != nil {
 		return nil, err
 	}
 
-	return &commonStory{client, story}, nil
+	return &commonStory{tracker.client, story}, nil
 }
