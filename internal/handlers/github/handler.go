@@ -121,7 +121,7 @@ func (handler *Handler) handleIssuesEvent(rw http.ResponseWriter, r *http.Reques
 	log.Printf("Issue being handled: %#v\n", body)
 
 	// Instantiate the issue tracker.
-	tracker, err := trackers.GetIssueTracker(body.TrackerId)
+	tracker, err := trackers.GetIssueTracker(body.TrackerName)
 	if err != nil {
 		log.Printf("WARNING in %v: %v\n", r.URL.Path, err)
 		httpStatus(rw, statusUnprocessableEntity)
@@ -129,7 +129,7 @@ func (handler *Handler) handleIssuesEvent(rw http.ResponseWriter, r *http.Reques
 	}
 
 	// Find relevant story.
-	story, err := tracker.FindStoryByTag(body.StoryId)
+	story, err := tracker.FindStoryByTag(body.StoryKey)
 	if err != nil {
 		log.Printf("WARNING in %v: story not found: %v\n", r.URL.Path, err)
 		httpStatus(rw, statusUnprocessableEntity)
@@ -208,18 +208,18 @@ func newSecretMiddleware(secret string) negroni.HandlerFunc {
 }
 
 const (
-	trackerIdTag = "SF-Issue-Tracker"
-	storyIdTag   = "SF-Story-Id"
+	trackerNameTag = "SF-Issue-Tracker"
+	storyKeyTag   = "SF-Story-Id"
 )
 
 var (
-	trackerIdRegexp = regexp.MustCompile(fmt.Sprintf("^%v: (.+)$", trackerIdTag))
-	storyIdRegexp   = regexp.MustCompile(fmt.Sprintf("^%v: (.+)$", storyIdTag))
+	trackerNameRegexp = regexp.MustCompile(fmt.Sprintf("^%v: (.+)$", trackerNameTag))
+	storyKeyRegexp   = regexp.MustCompile(fmt.Sprintf("^%v: (.+)$", storyKeyTag))
 )
 
 type issueBody struct {
-	TrackerId string
-	StoryId   string
+	TrackerName string
+	StoryKey   string
 }
 
 func parseIssueBody(content string) (*issueBody, error) {
@@ -228,15 +228,15 @@ func parseIssueBody(content string) (*issueBody, error) {
 	for scanner.Scan() {
 		line := scanner.Text()
 
-		match := trackerIdRegexp.FindStringSubmatch(line)
+		match := trackerNameRegexp.FindStringSubmatch(line)
 		if len(match) == 2 {
-			body.TrackerId = match[1]
+			body.TrackerName = match[1]
 			continue
 		}
 
-		match = storyIdRegexp.FindStringSubmatch(line)
+		match = storyKeyRegexp.FindStringSubmatch(line)
 		if len(match) == 2 {
-			body.StoryId = match[1]
+			body.StoryKey = match[1]
 			continue
 		}
 	}
@@ -245,10 +245,10 @@ func parseIssueBody(content string) (*issueBody, error) {
 	}
 
 	switch {
-	case body.TrackerId == "":
-		return nil, fmt.Errorf("parseIssueBody: %v tag not found", trackerIdTag)
-	case body.StoryId == "":
-		return nil, fmt.Errorf("parseIssueBody: %v tag not found", storyIdTag)
+	case body.TrackerName == "":
+		return nil, fmt.Errorf("parseIssueBody: %v tag not found", trackerNameTag)
+	case body.StoryKey == "":
+		return nil, fmt.Errorf("parseIssueBody: %v tag not found", storyKeyTag)
 	}
 
 	return &body, nil
