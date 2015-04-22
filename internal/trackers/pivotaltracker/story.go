@@ -14,15 +14,17 @@ type commonStory struct {
 }
 
 func (s *commonStory) OnReviewRequestOpened(rrID, rrURL string) error {
-	return s.addComment(fmt.Sprintf("GitHub review issue [#%v](%v) opened.", rrID, rrURL))
+	return s.addComment(fmt.Sprintf("Review request [#%v](%v) opened.", rrID, rrURL))
 }
 
 func (s *commonStory) OnReviewRequestClosed(rrID, rrURL string) error {
-	return s.addComment(fmt.Sprintf("GitHub review issue [#%v](%v) closed.", rrID, rrURL))
+	return nil
+	//return s.addComment(fmt.Sprintf("Review request [#%v](%v) closed.", rrID, rrURL))
 }
 
 func (s *commonStory) OnReviewRequestReopened(rrID, rrURL string) error {
-	return s.addComment(fmt.Sprintf("GitHub review issue [#%v](%v) reopened.", rrID, rrURL))
+	return nil
+	//return s.addComment(fmt.Sprintf("Review request [#%v](%v) reopened.", rrID, rrURL))
 }
 
 func (s *commonStory) MarkAsReviewed() error {
