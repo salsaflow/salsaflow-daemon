@@ -209,17 +209,17 @@ func newSecretMiddleware(secret string) negroni.HandlerFunc {
 
 const (
 	trackerNameTag = "SF-Issue-Tracker"
-	storyKeyTag   = "SF-Story-Id"
+	storyKeyTag    = "SF-Story-Key"
 )
 
 var (
 	trackerNameRegexp = regexp.MustCompile(fmt.Sprintf("^%v: (.+)$", trackerNameTag))
-	storyKeyRegexp   = regexp.MustCompile(fmt.Sprintf("^%v: (.+)$", storyKeyTag))
+	storyKeyRegexp    = regexp.MustCompile(fmt.Sprintf("^%v: (.+)$", storyKeyTag))
 )
 
 type issueBody struct {
 	TrackerName string
-	StoryKey   string
+	StoryKey    string
 }
 
 func parseIssueBody(content string) (*issueBody, error) {
