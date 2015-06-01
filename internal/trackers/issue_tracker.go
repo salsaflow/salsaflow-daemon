@@ -24,6 +24,7 @@ func (err *ErrUnknownTrackerId) Error() string {
 type factoryFunc func() common.IssueTracker
 
 var factories = map[string]factoryFunc{
+	jira.Id:           jira.Factory,
 	pivotaltracker.Id: pivotaltracker.Factory,
 }
 
