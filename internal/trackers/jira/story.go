@@ -1,4 +1,4 @@
-package pivotaltracker
+package jira
 
 import (
 	// Stdlib
@@ -30,7 +30,7 @@ func (s *commonStory) OnReviewRequestClosed(rrID, rrURL string) error {
 	// List the remote link associated with this issue.
 	links, err := s.listRemoteLinks()
 	if err != nil {
-		return nil, err
+		return nil
 	}
 
 	var (
@@ -80,7 +80,22 @@ func (s *commonStory) OnReviewRequestReopened(rrID, rrURL string) error {
 }
 
 func (s *commonStory) MarkAsReviewed() error {
-	panic("Not implemented")
+	switch s.issue.Fields.Status.Id {
+	// In case the issue is still Being Implemented, we are done.
+	case statusIdBeingImplemented:
+		return nil
+
+	// In case the issue is Implemented, we proceed with the transition.
+	case statusIdImplemented:
+		_, err := s.client.Issues.PerformTransition(s.issue.Key, transitionIdMarkAsReviewed)
+		return err
+
+	// By default we log a warning and return.
+	default:
+		log.Printf(
+			"JIRA: issue %v: not Implemented nor Being Implemented\n", s.issue.Key)
+		return nil
+	}
 }
 
 // Internal methods ------------------------------------------------------------

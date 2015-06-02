@@ -1,4 +1,4 @@
-package pivotaltracker
+package jira
 
 import (
 	// Internal
