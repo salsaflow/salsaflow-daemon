@@ -18,8 +18,8 @@ const Id = "Pivotal Tracker"
 
 const EnvToken = "PIVOTALTRACKER_TOKEN"
 
-func Factory() common.IssueTracker {
-	return &issueTracker{pivotal.NewClient(os.Getenv(EnvToken))}
+func Factory() (common.IssueTracker, error) {
+	return &issueTracker{pivotal.NewClient(os.Getenv(EnvToken))}, nil
 }
 
 type issueTracker struct {

@@ -6,6 +6,7 @@ import (
 
 	// Internal
 	"github.com/tchap/salsaflow-daemon/internal/trackers/common"
+	"github.com/tchap/salsaflow-daemon/internal/trackers/jira"
 	"github.com/tchap/salsaflow-daemon/internal/trackers/pivotaltracker"
 )
 
@@ -21,7 +22,7 @@ func (err *ErrUnknownTrackerId) Error() string {
 
 // Factory ---------------------------------------------------------------------
 
-type factoryFunc func() common.IssueTracker
+type factoryFunc func() (common.IssueTracker, error)
 
 var factories = map[string]factoryFunc{
 	jira.Id:           jira.Factory,
@@ -35,5 +36,5 @@ func GetIssueTracker(id string) (common.IssueTracker, error) {
 	if !ok {
 		return nil, &ErrUnknownTrackerId{id}
 	}
-	return factory(), nil
+	return factory()
 }
