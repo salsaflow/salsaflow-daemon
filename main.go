@@ -7,6 +7,7 @@ import (
 
 	// Internal
 	"github.com/tchap/salsaflow-daemon/internal/handlers/github"
+	"github.com/tchap/salsaflow-daemon/internal/handlers/jira"
 
 	// Vendor
 	"github.com/codegangsta/negroni"
@@ -22,6 +23,9 @@ func main() {
 		githubOptions = append(githubOptions, github.SetSecret(secret))
 	}
 	mux.Handle("/events/github", github.NewHandler(githubOptions...))
+
+	// Register JIRA testing handler.
+	mux.Handle("/jira/me", jira.NewMeHandler())
 
 	// Set up Negroni and start listening.
 	n := negroni.Classic()
