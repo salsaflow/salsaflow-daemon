@@ -12,11 +12,15 @@
 		},
 		{
 			"ImportPath": "github.com/google/go-github/github",
-			"Rev": "2431923100d4989611dcc339f1ff8d280bd9c84c"
+			"Rev": "6f7d3a5ad94d7a8c1cf7cb93d1364d0369ea8bbd"
 		},
 		{
 			"ImportPath": "github.com/google/go-querystring/query",
-			"Rev": "d8840cbb2baa915f4836edda4750050a2c0b7aea"
+			"Rev": "547ef5ac979778feb2f760cdb5f4eae1a2207b86"
+		},
+		{
+			"ImportPath": "github.com/salsita/go-jira/v2/jira",
+			"Rev": "c4928340d6d6c9449933e03c79b9f55c85063020"
 		},
 		{
 			"ImportPath": "github.com/salsita/go-pivotaltracker/v5/pivotal",
