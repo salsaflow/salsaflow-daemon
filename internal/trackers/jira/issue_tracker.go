@@ -1,12 +1,6 @@
 package pivotaltracker
 
 import (
-	// Stdlib
-	"fmt"
-	"os"
-	"strconv"
-	"strings"
-
 	// Internal
 	"github.com/tchap/salsaflow-daemon/internal/trackers/common"
 
