@@ -17,7 +17,7 @@ type commonStory struct {
 
 func (s *commonStory) OnReviewRequestOpened(rrID, rrURL string) error {
 	// Prepare the remote link object.
-	var link jira.IssueRemoteLink
+	var link jira.RemoteIssueLink
 	link.GlobalId = rrURL
 	link.Object.Title = rrID
 	link.Object.URL = rrURL
@@ -102,7 +102,7 @@ func (s *commonStory) MarkAsReviewed() error {
 
 func (s *commonStory) setRemoteLinkResolved(rrID, rrURL string, resolved bool) error {
 	// Prepare the update object.
-	var update jira.IssueRemoteLink
+	var update jira.RemoteIssueLink
 	update.GlobalId = rrURL
 	update.Object.Status.Resolved = resolved
 
@@ -110,30 +110,30 @@ func (s *commonStory) setRemoteLinkResolved(rrID, rrURL string, resolved bool) e
 	return s.updateRemoteLink(&update)
 }
 
-func (s *commonStory) createRemoteLink(link *jira.IssueRemoteLink) error {
-	_, _, err := s.client.IssueRemoteLinks.Create(s.issue.Key, link)
+func (s *commonStory) createRemoteLink(link *jira.RemoteIssueLink) error {
+	_, err := s.client.RemoteIssueLinks.Create(s.issue.Key, link)
 	return err
 }
 
-func (s *commonStory) listRemoteLinks() ([]*jira.IssueRemoteLink, error) {
-	links, _, err := s.client.IssueRemoteLinks.List(s.issue.Key)
+func (s *commonStory) listRemoteLinks() ([]*jira.RemoteIssueLink, error) {
+	links, _, err := s.client.RemoteIssueLinks.List(s.issue.Key)
 	return links, err
 }
 
-func (s *commonStory) updateRemoteLink(link *jira.IssueRemoteLink) error {
-	_, _, err := s.client.IssueRemoteLinks.Update(s.issue.Key, link)
+func (s *commonStory) updateRemoteLink(link *jira.RemoteIssueLink) error {
+	_, err := s.client.RemoteIssueLinks.Update(s.issue.Key, link)
 	return err
 }
 
-func (s *commonStory) findRemoteLink(rrID string) (*jira.IssueRemoteLink, error) {
-	links, _, err := s.client.IssueRemoteLinks.List(s.issue.Key)
+func (s *commonStory) findRemoteLink(rrID string) (*jira.RemoteIssueLink, error) {
+	links, _, err := s.client.RemoteIssueLinks.List(s.issue.Key)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, link := range links {
 		if link.Object.Title == rrID {
-			return &link, nil
+			return link, nil
 		}
 	}
 	return nil, nil
