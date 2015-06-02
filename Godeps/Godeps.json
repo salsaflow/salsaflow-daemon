@@ -20,11 +20,15 @@
 		},
 		{
 			"ImportPath": "github.com/salsita/go-jira/v2/jira",
-			"Rev": "c4928340d6d6c9449933e03c79b9f55c85063020"
+			"Rev": "a51046131b7c7da26463f82a2cd88c0d14741587"
 		},
 		{
 			"ImportPath": "github.com/salsita/go-pivotaltracker/v5/pivotal",
 			"Rev": "295a0a2e0ac5870c6fc8aa7b00d4957e3912410b"
+		},
+		{
+			"ImportPath": "github.com/tchap/oauth",
+			"Rev": "d1214b4ac4b16fedaf83df0732fe80be9683bd96"
 		}
 	]
 }
