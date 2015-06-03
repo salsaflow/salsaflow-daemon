@@ -2,6 +2,9 @@ package jira
 
 import (
 	// Stdlib
+	"crypto/x509"
+	"encoding/pem"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -15,10 +18,10 @@ import (
 func NewMeHandler() http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		var (
-			baseURL      = os.Getenv("JIRA_BASE_URL")
-			clientKey    = os.Getenv("JIRA_OAUTH_CONSUMER_KEY")
-			clientSecret = os.Getenv("JIRA_OAUTH_CONSUMER_SECRET")
-			accessToken  = os.Getenv("JIRA_OAUTH_ACCESS_TOKEN")
+			baseURL          = os.Getenv("JIRA_BASE_URL")
+			oauthConsumerKey = os.Getenv("JIRA_OAUTH_CONSUMER_KEY")
+			oauthPrivateKey  = os.Getenv("JIRA_OAUTH_PRIVATE_KEY")
+			oauthAccessToken = os.Getenv("JIRA_OAUTH_ACCESS_TOKEN")
 		)
 
 		base, err := url.Parse(baseURL)
@@ -27,7 +30,18 @@ func NewMeHandler() http.Handler {
 			return
 		}
 
-		httpClient := jira.NewOAuthClient(clientKey, clientSecret, accessToken)
+		block, _ := pem.Decode([]byte(oauthPrivateKey))
+		if block == nil {
+			httpError(rw, errors.New("failed to parse OAuth private key"))
+			return
+		}
+		privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+		if err != nil {
+			httpError(rw, err)
+			return
+		}
+
+		httpClient := jira.NewOAuthClient(base, oauthConsumerKey, privateKey, oauthAccessToken)
 
 		client := jira.NewClient(base, httpClient)
 
