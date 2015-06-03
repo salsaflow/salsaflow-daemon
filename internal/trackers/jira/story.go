@@ -26,7 +26,7 @@ func (s *commonStory) OnReviewRequestOpened(rrID, rrURL string) error {
 	link.GlobalId = rrURL
 	link.Object.Title = toTitle(rrID)
 	link.Object.URL = rrURL
-	link.Object.Status.Icon.URL = iconOpen
+	link.Object.Icon.URL = iconOpen
 
 	// Create the remote link.
 	return s.createRemoteLink(&link)
@@ -125,7 +125,7 @@ func (s *commonStory) setRemoteLinkResolved(rrID, rrURL string, resolved bool) e
 	} else {
 		icon = iconOpen
 	}
-	update.Object.Status.Icon.URL = icon
+	update.Object.Icon.URL = icon
 
 	// Update the remote link.
 	return s.updateRemoteLink(&update)
