@@ -3,6 +3,7 @@ package jira
 import (
 	// Internal
 	"github.com/tchap/salsaflow-daemon/internal/trackers/common"
+	"github.com/tchap/salsaflow-daemon/internal/utils/jirautils"
 
 	// Vendor
 	"github.com/salsita/go-jira/v2/jira"
@@ -11,7 +12,11 @@ import (
 const Id = "JIRA"
 
 func Factory() (common.IssueTracker, error) {
-	panic("Not implemented")
+	client, err := jirautils.NewClient()
+	if err != nil {
+		return nil, err
+	}
+	return &issueTracker{client}, nil
 }
 
 type issueTracker struct {
