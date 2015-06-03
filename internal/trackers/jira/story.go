@@ -8,6 +8,11 @@ import (
 	"github.com/salsita/go-jira/v2/jira"
 )
 
+const (
+	iconOpen   = "https://raw.githubusercontent.com/github-archive/media/master/octocats/blacktocat-16.png"
+	iconClosed = "http://www.openwebgraphics.com/resources/data/47/accept.png"
+)
+
 type commonStory struct {
 	client *jira.Client
 	issue  *jira.Issue
@@ -21,6 +26,7 @@ func (s *commonStory) OnReviewRequestOpened(rrID, rrURL string) error {
 	link.GlobalId = rrURL
 	link.Object.Title = toTitle(rrID)
 	link.Object.URL = rrURL
+	link.Object.Status.Icon.URL = iconOpen
 
 	// Create the remote link.
 	return s.createRemoteLink(&link)
@@ -112,6 +118,14 @@ func (s *commonStory) setRemoteLinkResolved(rrID, rrURL string, resolved bool) e
 	update.Object.Title = toTitle(rrID)
 	update.Object.URL = rrURL
 	update.Object.Status.Resolved = resolved
+
+	var icon string
+	if resolved {
+		icon = iconClosed
+	} else {
+		icon = iconOpen
+	}
+	update.Object.Status.Icon.URL = icon
 
 	// Update the remote link.
 	return s.updateRemoteLink(&update)
