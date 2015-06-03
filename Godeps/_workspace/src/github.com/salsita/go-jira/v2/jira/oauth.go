@@ -19,15 +19,23 @@ package jira
 
 import (
 	// Stdlib
+	"crypto/rsa"
 	"net/http"
+	"net/url"
 
 	// Vendor
 	"github.com/tchap/oauth"
 )
 
-func NewOAuthClient(clientKey, clientSecret, accessToken string) *http.Client {
+func NewOAuthClient(
+	jiraBaseURL *url.URL,
+	consumerKey string,
+	privateKey *rsa.PrivateKey,
+	accessToken string,
+) *http.Client {
+
 	return &http.Client{
-		Transport: newOAuthRoundTripper(clientKey, clientSecret, accessToken),
+		Transport: newOAuthRoundTripper(jiraBaseURL, consumerKey, privateKey, accessToken),
 	}
 }
 
@@ -36,9 +44,26 @@ type oauthRoundTripper struct {
 	token    *oauth.AccessToken
 }
 
-func newOAuthRoundTripper(clientKey, clientSecret, accessToken string) *oauthRoundTripper {
+func newOAuthRoundTripper(
+	jiraBaseURL *url.URL,
+	consumerKey string,
+	privateKey *rsa.PrivateKey,
+	accessToken string,
+) *oauthRoundTripper {
+
+	requestTokenURL, _ := url.Parse("/plugins/servlet/oauth/request-token")
+	authorizeTokenURL, _ := url.Parse("/plugins/servlet/oauth/authorize")
+	accessTokenURL, _ := url.Parse("/plugins/servlet/oauth/access-token")
+
+	provider := oauth.ServiceProvider{
+		RequestTokenUrl:   jiraBaseURL.ResolveReference(requestTokenURL).String(),
+		AuthorizeTokenUrl: jiraBaseURL.ResolveReference(authorizeTokenURL).String(),
+		AccessTokenUrl:    jiraBaseURL.ResolveReference(accessTokenURL).String(),
+		HttpMethod:        "POST",
+	}
+
 	return &oauthRoundTripper{
-		consumer: oauth.NewConsumer(clientKey, clientSecret, oauth.ServiceProvider{}),
+		consumer: oauth.NewRSAConsumer(consumerKey, privateKey, provider),
 		token:    &oauth.AccessToken{Token: accessToken},
 	}
 }
