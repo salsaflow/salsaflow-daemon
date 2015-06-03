@@ -65,7 +65,7 @@ func (s *commonStory) OnReviewRequestClosed(rrID, rrURL string) error {
 
 	// In case all links are resolved, mark the issue as reviewed.
 	if allResolved {
-		return s.MarkAsReviewed()
+		return s.markIssueAsReviewed()
 	}
 
 	return nil
@@ -81,28 +81,15 @@ func (s *commonStory) OnReviewRequestReopened(rrID, rrURL string) error {
 		log.Printf("JIRA: remote link not found: issue %v, review issue %v\n", s.issue.Key, rrURL)
 		return nil
 	}
+	// No need to do anything really, everything is in OnReviewRequestClosed.
 
 	// Mark the link as resolved.
 	return s.setRemoteLinkResolved(rrID, rrURL, false)
 }
 
 func (s *commonStory) MarkAsReviewed() error {
-	switch s.issue.Fields.Status.Id {
-	// In case the issue is still Being Implemented, we are done.
-	case statusIdBeingImplemented:
-		return nil
-
-	// In case the issue is Implemented, we proceed with the transition.
-	case statusIdImplemented:
-		_, err := s.client.Issues.PerformTransition(s.issue.Key, transitionIdMarkAsReviewed)
-		return err
-
-	// By default we log a warning and return.
-	default:
-		log.Printf(
-			"JIRA: issue %v: not Implemented nor Being Implemented\n", s.issue.Key)
-		return nil
-	}
+	// No need to do anything really, everything is in OnReviewRequestClosed.
+	return nil
 }
 
 // Internal methods ------------------------------------------------------------
@@ -155,6 +142,25 @@ func (s *commonStory) findRemoteLink(rrID string) (*jira.RemoteIssueLink, error)
 		}
 	}
 	return nil, nil
+}
+
+func (s *commonStory) markIssueAsReviewed() error {
+	switch s.issue.Fields.Status.Id {
+	// In case the issue is still Being Implemented, we are done.
+	case statusIdBeingImplemented:
+		return nil
+
+	// In case the issue is Implemented, we proceed with the transition.
+	case statusIdImplemented:
+		_, err := s.client.Issues.PerformTransition(s.issue.Key, transitionIdMarkAsReviewed)
+		return err
+
+	// By default we log a warning and return.
+	default:
+		log.Printf(
+			"JIRA: issue %v: not Implemented nor Being Implemented\n", s.issue.Key)
+		return nil
+	}
 }
 
 func toTitle(rrID string) string {
