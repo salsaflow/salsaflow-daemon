@@ -19,7 +19,7 @@ func (s *commonStory) OnReviewRequestOpened(rrID, rrURL string) error {
 	// Prepare the remote link object.
 	var link jira.RemoteIssueLink
 	link.GlobalId = rrURL
-	link.Object.Title = rrID
+	link.Object.Title = toTitle(rrID)
 	link.Object.URL = rrURL
 
 	// Create the remote link.
@@ -34,11 +34,12 @@ func (s *commonStory) OnReviewRequestClosed(rrID, rrURL string) error {
 	}
 
 	var (
+		title       = toTitle(rrID)
 		linkFound   = false
 		allResolved = true
 	)
 	for _, link := range links {
-		if link.Object.Title == rrID {
+		if link.Object.Title == title {
 			linkFound = true
 			continue
 		}
@@ -104,6 +105,8 @@ func (s *commonStory) setRemoteLinkResolved(rrID, rrURL string, resolved bool) e
 	// Prepare the update object.
 	var update jira.RemoteIssueLink
 	update.GlobalId = rrURL
+	update.Object.Title = toTitle(rrID)
+	update.Object.URL = rrURL
 	update.Object.Status.Resolved = resolved
 
 	// Update the remote link.
@@ -131,10 +134,15 @@ func (s *commonStory) findRemoteLink(rrID string) (*jira.RemoteIssueLink, error)
 		return nil, err
 	}
 
+	title := toTitle(rrID)
 	for _, link := range links {
-		if link.Object.Title == rrID {
+		if link.Object.Title == title {
 			return link, nil
 		}
 	}
 	return nil, nil
+}
+
+func toTitle(rrID string) string {
+	return "Review issue #" + rrID
 }
