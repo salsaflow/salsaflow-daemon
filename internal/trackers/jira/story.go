@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	iconOpen   = "https://raw.githubusercontent.com/github-archive/media/master/octocats/blacktocat-16.png"
+	iconOpen   = "https://raw.githubusercontent.com/tchap/salsaflow-daemon/mvp/internal/trackers/jira/img/blacktocat-16.png"
 	iconClosed = "http://www.openwebgraphics.com/resources/data/47/accept.png"
 )
 
@@ -38,8 +38,6 @@ func (s *commonStory) OnReviewRequestClosed(rrID, rrURL string) error {
 	if err != nil {
 		return nil
 	}
-
-	log.Println(links)
 
 	var (
 		title       = toTitle(rrID)
@@ -110,8 +108,6 @@ func (s *commonStory) MarkAsReviewed() error {
 // Internal methods ------------------------------------------------------------
 
 func (s *commonStory) setRemoteLinkResolved(rrID, rrURL string, resolved bool) error {
-	log.Println("Set remote link resolved:", rrID)
-
 	// Prepare the update object.
 	var update jira.RemoteIssueLink
 	update.GlobalId = rrURL
