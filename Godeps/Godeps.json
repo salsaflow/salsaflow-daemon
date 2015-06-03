@@ -20,7 +20,7 @@
 		},
 		{
 			"ImportPath": "github.com/salsita/go-jira/v2/jira",
-			"Rev": "c8c323777d75026d5b6a62ed17584f48885a6a8e"
+			"Rev": "19c73e78c8b1906e2294c635c71fcb770b2ec3b8"
 		},
 		{
 			"ImportPath": "github.com/salsita/go-pivotaltracker/v5/pivotal",
