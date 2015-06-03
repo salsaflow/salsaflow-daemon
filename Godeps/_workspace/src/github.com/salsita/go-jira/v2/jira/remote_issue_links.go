@@ -39,7 +39,7 @@ type RemoteIssueLink struct {
 			Title string `json:"title,omitempty"`
 		} `json:"icon,omitempty"`
 		Status struct {
-			Resolved bool
+			Resolved bool `json:"resolved"`
 			Icon     struct {
 				URL   string `json:"url16x16,omitempty"`
 				Title string `json:"title,omitempty"`
