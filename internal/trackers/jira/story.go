@@ -33,6 +33,8 @@ func (s *commonStory) OnReviewRequestClosed(rrID, rrURL string) error {
 		return nil
 	}
 
+	log.Println(links)
+
 	var (
 		title       = toTitle(rrID)
 		linkFound   = false
@@ -102,6 +104,8 @@ func (s *commonStory) MarkAsReviewed() error {
 // Internal methods ------------------------------------------------------------
 
 func (s *commonStory) setRemoteLinkResolved(rrID, rrURL string, resolved bool) error {
+	log.Println("Set remote link resolved:", rrID)
+
 	// Prepare the update object.
 	var update jira.RemoteIssueLink
 	update.GlobalId = rrURL
