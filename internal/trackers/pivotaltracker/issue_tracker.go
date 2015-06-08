@@ -3,7 +3,6 @@ package pivotaltracker
 import (
 	// Stdlib
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 
@@ -16,10 +15,9 @@ import (
 
 const Id = "Pivotal Tracker"
 
-const EnvToken = "PIVOTALTRACKER_TOKEN"
-
 func Factory() (common.IssueTracker, error) {
-	return &issueTracker{pivotal.NewClient(os.Getenv(EnvToken))}, nil
+	config := GetConfig()
+	return &issueTracker{pivotal.NewClient(config.Token)}, nil
 }
 
 type issueTracker struct {
