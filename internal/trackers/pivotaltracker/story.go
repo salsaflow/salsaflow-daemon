@@ -19,20 +19,45 @@ func (s *commonStory) OnReviewRequestOpened(rrID, rrURL string) error {
 
 func (s *commonStory) OnReviewRequestClosed(rrID, rrURL string) error {
 	return nil
-	//return s.addComment(fmt.Sprintf("Review request [#%v](%v) closed.", rrID, rrURL))
 }
 
 func (s *commonStory) OnReviewRequestReopened(rrID, rrURL string) error {
+	// Prune workflow labels.
+	// Reset to started.
+	state := pivotal.StoryStateStarted
+	labels := pruneLabels(*s.story.Labels)
+
+	// Update the story.
+	req := &pivotal.Story{
+		State:  state,
+		Labels: &labels,
+	}
+	story, _, err := s.client.Stories.Update(s.story.ProjectId, s.story.Id, req)
+	if err != nil {
+		return err
+	}
+
+	s.story = story
 	return nil
-	//return s.addComment(fmt.Sprintf("Review request [#%v](%v) reopened.", rrID, rrURL))
 }
 
 func (s *commonStory) MarkAsReviewed() error {
-	// Add the 'reviewed' label.
-	req := &pivotal.Story{
-		Labels: append(s.story.Labels, &pivotal.Label{Name: "reviewed"}),
-	}
+	// Get PT config.
+	config := GetConfig()
 
+	// Prune workflow labels.
+	// Add the reviewed label.
+	// Reset to started.
+	state := pivotal.StoryStateStarted
+	labels := append(pruneLabels(*s.story.Labels), &pivotal.Label{
+		Name: config.ReviewedLabel,
+	})
+
+	// Update the story.
+	req := &pivotal.Story{
+		State:  state,
+		Labels: &labels,
+	}
 	story, _, err := s.client.Stories.Update(s.story.ProjectId, s.story.Id, req)
 	if err != nil {
 		return err
@@ -54,6 +79,24 @@ func (s *commonStory) addComment(text string) error {
 		return err
 	}
 
-	s.story.CommentIds = append(s.story.CommentIds, comment.Id)
+	commentIds := append(*s.story.CommentIds, comment.Id)
+	s.story.CommentIds = &commentIds
 	return nil
+}
+
+func pruneLabels(labels []*pivotal.Label) []*pivotal.Label {
+	ls := make([]*pivotal.Label, 0, len(labels))
+	for _, label := range labels {
+		switch label.Name {
+		case config.ReviewedLabel:
+		case config.TestingPassedLabel:
+		case config.TestingFailedLabel:
+		case config.ImplementedLabel:
+		default:
+			ls = append(labels, &pivotal.Label{
+				Id: label.Id,
+			})
+		}
+	}
+	return ls
 }
