@@ -25,26 +25,18 @@ func init() {
 	}
 
 	var missing bool
-	if config.Token == "" {
-		log.Println("variable not set: SFD_PT_TOKEN")
-		missing = true
+	ensure := func(variable, value string) {
+		if value == "" {
+			log.Printf("environment variable not set: %v\n", variable)
+			missing = true
+		}
 	}
-	if config.ReviewedLabel == "" {
-		log.Println("variable not set: SFD_PT_REVIEWED_LABEL")
-		missing = true
-	}
-	if config.TestingPassedLabel == "" {
-		log.Println("variable not set: SFD_PT_TESTING_PASSED_LABEL")
-		missing = true
-	}
-	if config.TestingFailedLabel == "" {
-		log.Println("variable not set: SFD_PT_TESTING_FAILED_LABEL")
-		missing = true
-	}
-	if config.ImplementedLabel == "" {
-		log.Println("variable not set: SFD_PT_IMPLEMENTED_LABEL")
-		missing = true
-	}
+
+	ensure("SFD_PT_TOKEN", config.Token)
+	ensure("SFD_PT_REVIEWED_LABEL", config.ReviewedLabel)
+	ensure("SFD_PT_TESTING_PASSED_LABEL", config.TestingPassedLabel)
+	ensure("SFD_PT_TESTING_FAILED_LABEL", config.TestingFailedLabel)
+	ensure("SFD_PT_IMPLEMENTED_LABEL", config.ImplementedLabel)
 
 	if missing {
 		os.Exit(1)
