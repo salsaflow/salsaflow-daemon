@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	// Internal
-	"github.com/tchap/salsaflow-daemon/internal/trackers/common"
-	"github.com/tchap/salsaflow-daemon/internal/trackers/jira"
-	"github.com/tchap/salsaflow-daemon/internal/trackers/pivotaltracker"
+	"github.com/salsaflow/salsaflow-daemon/internal/trackers/common"
+	"github.com/salsaflow/salsaflow-daemon/internal/trackers/jira"
+	"github.com/salsaflow/salsaflow-daemon/internal/trackers/pivotaltracker"
 )
 
 // Errors ----------------------------------------------------------------------

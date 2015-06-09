@@ -6,8 +6,8 @@ import (
 	"net/http"
 
 	// Internal
-	"github.com/tchap/salsaflow-daemon/internal/utils/httputils"
-	"github.com/tchap/salsaflow-daemon/internal/utils/jirautils"
+	"github.com/salsaflow/salsaflow-daemon/internal/utils/httputils"
+	"github.com/salsaflow/salsaflow-daemon/internal/utils/jirautils"
 )
 
 func NewMeHandler() http.Handler {

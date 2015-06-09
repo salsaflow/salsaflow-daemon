@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	// Internal
-	"github.com/tchap/salsaflow-daemon/internal/trackers/common"
+	"github.com/salsaflow/salsaflow-daemon/internal/trackers/common"
 
 	// Vendor
 	"github.com/salsita/go-pivotaltracker/v5/pivotal"
