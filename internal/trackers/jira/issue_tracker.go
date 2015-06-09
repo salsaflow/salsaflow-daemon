@@ -2,8 +2,8 @@ package jira
 
 import (
 	// Internal
-	"github.com/tchap/salsaflow-daemon/internal/trackers/common"
-	"github.com/tchap/salsaflow-daemon/internal/utils/jirautils"
+	"github.com/salsaflow/salsaflow-daemon/internal/trackers/common"
+	"github.com/salsaflow/salsaflow-daemon/internal/utils/jirautils"
 
 	// Vendor
 	"github.com/salsita/go-jira/v2/jira"

@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	iconOpen   = "https://raw.githubusercontent.com/tchap/salsaflow-daemon/mvp/internal/trackers/jira/img/blacktocat-16.png"
-	iconClosed = "https://raw.githubusercontent.com/tchap/salsaflow-daemon/mvp/internal/trackers/jira/img/greentocat-16.png"
+	iconOpen   = "https://raw.githubusercontent.com/salsaflow/salsaflow-daemon/develop/internal/trackers/jira/img/blacktocat-16.png"
+	iconClosed = "https://raw.githubusercontent.com/salsaflow/salsaflow-daemon/develop/internal/trackers/jira/img/greentocat-16.png"
 )
 
 type commonStory struct {

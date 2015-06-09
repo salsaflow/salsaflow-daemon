@@ -18,7 +18,7 @@ import (
 	"strings"
 
 	// Internal
-	"github.com/tchap/salsaflow-daemon/internal/trackers"
+	"github.com/salsaflow/salsaflow-daemon/internal/trackers"
 
 	// Vendor
 	"github.com/codegangsta/negroni"
