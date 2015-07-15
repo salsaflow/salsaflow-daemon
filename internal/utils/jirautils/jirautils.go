@@ -5,46 +5,23 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
-	"fmt"
 	"net/url"
-	"os"
+
+	// Internal
+	"github.com/salsaflow/salsaflow-daemon/internal/env"
 
 	// Vendor
 	"github.com/salsita/go-jira/v2/jira"
 )
 
-type ErrNotSet struct {
-	varName string
-}
-
-func (err *ErrNotSet) Error() string {
-	return fmt.Sprintf("Environment variable not set: %v", err.varName)
-}
-
 func NewClient() (client *jira.Client, err error) {
-	mustGetenv := func(varName string) string {
-		value := os.Getenv(varName)
-		if value == "" {
-			panic(&ErrNotSet{varName})
-		}
-		return value
-	}
-
-	defer func() {
-		if r := recover(); r != nil {
-			if ex, ok := r.(*ErrNotSet); ok {
-				err = ex
-			} else {
-				panic(r)
-			}
-		}
-	}()
+	defer env.Recover(&err)
 
 	var (
-		baseURL          = mustGetenv("JIRA_BASE_URL")
-		oauthConsumerKey = mustGetenv("JIRA_OAUTH_CONSUMER_KEY")
-		oauthPrivateKey  = mustGetenv("JIRA_OAUTH_PRIVATE_KEY")
-		oauthAccessToken = mustGetenv("JIRA_OAUTH_ACCESS_TOKEN")
+		baseURL          = env.MustGetenv("JIRA_BASE_URL")
+		oauthConsumerKey = env.MustGetenv("JIRA_OAUTH_CONSUMER_KEY")
+		oauthPrivateKey  = env.MustGetenv("JIRA_OAUTH_PRIVATE_KEY")
+		oauthAccessToken = env.MustGetenv("JIRA_OAUTH_ACCESS_TOKEN")
 	)
 
 	base, err := url.Parse(baseURL)
