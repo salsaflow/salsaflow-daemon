@@ -25,10 +25,10 @@ func (s *commonStory) OnReviewRequestReopened(rrID, rrURL string) error {
 	// Prune workflow labels.
 	// Reset to started.
 	state := pivotal.StoryStateStarted
-	labels := pruneLabels(*s.story.Labels)
+	labels := pruneLabels(s.story.Labels)
 
 	// Update the story.
-	req := &pivotal.Story{
+	req := &pivotal.StoryRequest{
 		State:  state,
 		Labels: &labels,
 	}
@@ -49,12 +49,12 @@ func (s *commonStory) MarkAsReviewed() error {
 	// Add the reviewed label.
 	// Reset to started.
 	state := pivotal.StoryStateStarted
-	labels := append(pruneLabels(*s.story.Labels), &pivotal.Label{
+	labels := append(pruneLabels(s.story.Labels), &pivotal.Label{
 		Name: config.ReviewedLabel,
 	})
 
 	// Update the story.
-	req := &pivotal.Story{
+	req := &pivotal.StoryRequest{
 		State:  state,
 		Labels: &labels,
 	}
@@ -79,8 +79,7 @@ func (s *commonStory) addComment(text string) error {
 		return err
 	}
 
-	commentIds := append(*s.story.CommentIds, comment.Id)
-	s.story.CommentIds = &commentIds
+	s.story.CommentIds = append(s.story.CommentIds, comment.Id)
 	return nil
 }
 
