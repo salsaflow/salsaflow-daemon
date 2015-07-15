@@ -24,16 +24,29 @@
 			"Rev": "43da5b79aea0685e4559667d3c88a5cb19c460c5"
 		},
 		{
+			"ImportPath": "github.com/salsaflow/salsaflow/github/issues",
+			"Comment": "v0.2.0-568-g113a70c",
+			"Rev": "113a70cb41a70b57859a4ba4ad493e306e513013"
+		},
+		{
 			"ImportPath": "github.com/salsita/go-jira/v2/jira",
-			"Rev": "6564b5bc5adce91f3d465b3cd95f09a524b03440"
+			"Rev": "96f003574571a8b744e2f2a6df6fe52dd1d09c4c"
 		},
 		{
 			"ImportPath": "github.com/salsita/go-pivotaltracker/v5/pivotal",
-			"Rev": "06c120eb050c14517c7928d0e8009a95870bf868"
+			"Rev": "c0f7a1cefce399e2fe46024b4d0dd8b5a159c7af"
 		},
 		{
 			"ImportPath": "github.com/tchap/oauth",
 			"Rev": "d1214b4ac4b16fedaf83df0732fe80be9683bd96"
+		},
+		{
+			"ImportPath": "golang.org/x/net/context",
+			"Rev": "7212a0803472eb1ec2686896a7c626528172a7a6"
+		},
+		{
+			"ImportPath": "golang.org/x/oauth2",
+			"Rev": "f98d0160877ab4712b906626425ed8b0b320907c"
 		}
 	]
 }
