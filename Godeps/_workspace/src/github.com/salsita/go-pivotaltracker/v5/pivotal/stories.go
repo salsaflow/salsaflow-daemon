@@ -1,19 +1,6 @@
-/*
-   Copyright (C) 2014  Salsita s.r.o.
-
-   This program is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program. If not, see {http://www.gnu.org/licenses/}.
-*/
+// Copyright (c) 2014 Salsita Software
+// Use of this source code is governed by the MIT License.
+// The license can be found in the LICENSE file.
 
 package pivotal
 
@@ -53,19 +40,33 @@ type Story struct {
 	AcceptedAt    *time.Time `json:"accepted_at,omitempty"`
 	Deadline      *time.Time `json:"deadline,omitempty"`
 	RequestedById int        `json:"requested_by_id,omitempty"`
-	OwnerIds      *[]int     `json:"owner_ids,omitempty"`
-	LabelIds      *[]int     `json:"label_ids,omitempty"`
-	Labels        *[]*Label  `json:"labels,omitempty"`
-	TaskIds       *[]int     `json:"task_ids,omitempty"`
-	Tasks         *[]int     `json:"tasks,omitempty"`
-	FollowerIds   *[]int     `json:"follower_ids,omitempty"`
-	CommentIds    *[]int     `json:"comment_ids,omitempty"`
+	OwnerIds      []int      `json:"owner_ids,omitempty"`
+	LabelIds      []int      `json:"label_ids,omitempty"`
+	Labels        []*Label   `json:"labels,omitempty"`
+	TaskIds       []int      `json:"task_ids,omitempty"`
+	Tasks         []int      `json:"tasks,omitempty"`
+	FollowerIds   []int      `json:"follower_ids,omitempty"`
+	CommentIds    []int      `json:"comment_ids,omitempty"`
 	CreatedAt     *time.Time `json:"created_at,omitempty"`
 	UpdatedAt     *time.Time `json:"updated_at,omitempty"`
 	IntegrationId int        `json:"integration_id,omitempty"`
 	ExternalId    string     `json:"external_id,omitempty"`
 	URL           string     `json:"url,omitempty"`
-	Kind          string     `json:"kind,omitempty"`
+}
+
+type StoryRequest struct {
+	Name        string    `json:"name,omitempty"`
+	Description string    `json:"description,omitempty"`
+	Type        string    `json:"story_type,omitempty"`
+	State       string    `json:"current_state,omitempty"`
+	Estimate    *float64  `json:"estimate,omitempty"`
+	OwnerIds    *[]int    `json:"owner_ids,omitempty"`
+	LabelIds    *[]int    `json:"label_ids,omitempty"`
+	Labels      *[]*Label `json:"labels,omitempty"`
+	TaskIds     *[]int    `json:"task_ids,omitempty"`
+	Tasks       *[]int    `json:"tasks,omitempty"`
+	FollowerIds *[]int    `json:"follower_ids,omitempty"`
+	CommentIds  *[]int    `json:"comment_ids,omitempty"`
 }
 
 type Label struct {
@@ -154,7 +155,7 @@ func (service *StoryService) Get(projectId, storyId int) (*Story, *http.Response
 	return &story, resp, err
 }
 
-func (service *StoryService) Update(projectId, storyId int, story *Story) (*Story, *http.Response, error) {
+func (service *StoryService) Update(projectId, storyId int, story *StoryRequest) (*Story, *http.Response, error) {
 	u := fmt.Sprintf("projects/%v/stories/%v", projectId, storyId)
 	req, err := service.client.NewRequest("PUT", u, story)
 	if err != nil {
