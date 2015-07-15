@@ -11,14 +11,15 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
 
 	// Internal
+	"github.com/salsaflow/salsaflow-daemon/internal/log"
 	"github.com/salsaflow/salsaflow-daemon/internal/trackers"
+	"github.com/salsaflow/salsaflow-daemon/internal/utils/httputils"
 
 	// Vendor
 	"github.com/codegangsta/negroni"
@@ -81,7 +82,7 @@ func (handler *Handler) handleIssuesEvent(rw http.ResponseWriter, r *http.Reques
 	// Parse the payload.
 	var event github.IssueActivityEvent
 	if err := json.NewDecoder(r.Body).Decode(&event); err != nil {
-		log.Printf("WARNING in %v: failed to parse event: %v\n", r.URL.Path, err)
+		log.Warn(r, "failed to parse event: %v", err)
 		httpStatus(rw, http.StatusBadRequest)
 		return
 	}
@@ -113,17 +114,16 @@ func (handler *Handler) handleIssuesEvent(rw http.ResponseWriter, r *http.Reques
 	// Parse issue body.
 	body, err := parseIssueBody(*issue.Body)
 	if err != nil {
-		log.Printf("WARNING in %v: failed to parse issue body: %v\n", r.URL.Path, err)
+		log.Error(r, err)
 		httpStatus(rw, statusUnprocessableEntity)
 		return
 	}
 
-	log.Printf("Issue being handled: %#v\n", body)
 
 	// Instantiate the issue tracker.
 	tracker, err := trackers.GetIssueTracker(body.TrackerName)
 	if err != nil {
-		log.Printf("WARNING in %v: %v\n", r.URL.Path, err)
+		log.Error(r, err)
 		httpStatus(rw, statusUnprocessableEntity)
 		return
 	}
@@ -131,7 +131,7 @@ func (handler *Handler) handleIssuesEvent(rw http.ResponseWriter, r *http.Reques
 	// Find relevant story.
 	story, err := tracker.FindStoryByTag(body.StoryKey)
 	if err != nil {
-		log.Printf("WARNING in %v: story not found: %v\n", r.URL.Path, err)
+		log.Error(r, err)
 		httpStatus(rw, statusUnprocessableEntity)
 		return
 	}
@@ -153,15 +153,13 @@ func (handler *Handler) handleIssuesEvent(rw http.ResponseWriter, r *http.Reques
 		panic("unreachable code reached")
 	}
 	if ex != nil {
-		log.Printf("WARNING in %v: event handler failed: %v\n", r.URL.Path, ex)
-		httpStatus(rw, http.StatusInternalServerError)
+		httputils.Error(rw, r, err)
 		return
 	}
 
 	if *event.Action == "closed" {
 		if err := story.MarkAsReviewed(); err != nil {
-			log.Printf("WARNING in %v: failed to mark story as reviewed: %v\n", r.URL.Path, err)
-			httpStatus(rw, http.StatusInternalServerError)
+			httputils.Error(rw, r, err)
 			return
 		}
 	}
@@ -175,8 +173,7 @@ func newSecretMiddleware(secret string) negroni.HandlerFunc {
 			// Read the request body into a buffer.
 			bodyBytes, err := ioutil.ReadAll(r.Body)
 			if err != nil {
-				log.Printf("ERROR in %v: %v\n", r.URL.Path, err)
-				httpStatus(rw, http.StatusInternalServerError)
+				httputils.Error(rw, r, err)
 				return
 			}
 
@@ -187,8 +184,7 @@ func newSecretMiddleware(secret string) negroni.HandlerFunc {
 			// Compute the hash.
 			mac := hmac.New(sha1.New, []byte(secret))
 			if _, err := io.Copy(mac, bytes.NewReader(bodyBytes)); err != nil {
-				log.Printf("ERROR in %v: %v\n", r.URL.Path, err)
-				httpStatus(rw, http.StatusInternalServerError)
+				httputils.Error(rw, r, err)
 				return
 			}
 
@@ -196,8 +192,8 @@ func newSecretMiddleware(secret string) negroni.HandlerFunc {
 			secretHeader := r.Header.Get("X-Hub-Signature")
 			expected := "sha1=" + hex.EncodeToString(mac.Sum(nil))
 			if secretHeader != expected {
-				log.Printf("WARNING in %v: HMAC mismatch detected: expected='%v', got='%v'\n",
-					r.URL.Path, expected, secretHeader)
+				log.Warn(r, "HMAC mismatch detected: expected='%v', got='%v'\n",
+					expected, secretHeader)
 				httpStatus(rw, http.StatusUnauthorized)
 				return
 			}

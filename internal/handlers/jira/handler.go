@@ -14,13 +14,13 @@ func NewMeHandler() http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		client, err := jirautils.NewClient()
 		if err != nil {
-			httputils.Error(rw, err)
+			httputils.Error(rw, r, err)
 			return
 		}
 
 		me, _, err := client.Myself.Get()
 		if err != nil {
-			httputils.Error(rw, err)
+			httputils.Error(rw, r, err)
 			return
 		}
 
