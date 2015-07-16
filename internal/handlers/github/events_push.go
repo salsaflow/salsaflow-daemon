@@ -28,6 +28,8 @@ func handlePushEvent(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Printf("%+v\n", event)
+
 	// Go through the commits and search for SalsaFlow commands.
 	for _, commit := range event.Commits {
 		scanner := bufio.NewScanner(strings.NewReader(*commit.Message))
