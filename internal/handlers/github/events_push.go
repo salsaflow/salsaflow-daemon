@@ -56,19 +56,19 @@ func handlePushEvent(rw http.ResponseWriter, r *http.Request) {
 
 				// Mark the relevant review blocker as unblocked.
 				owner, repo := *event.Repo.Owner.Login, *event.Repo.Name
-				updated, err := unblockReviewBlocker(owner, repo, &commit, blockerNum)
+				issue, blocker, err := unblockReviewBlocker(owner, repo, &commit, blockerNum)
 				if err != nil {
 					log.Error(r, err)
 					continue
 				}
-				if !updated {
+				if issue == nil {
 					log.Warn(r, "!unblock: unknown blocker number [commit=%v, blocker=%v]",
 						*commit.SHA, blockerNum)
 					continue
 				}
 
 				// Add a comment to the review issue.
-				err = addUnblockComment(owner, repo, &commit, blockerNum)
+				err = addUnblockComment(owner, repo, *issue.Number, blocker, &commit)
 				if err != nil {
 					log.Error(r, err)
 					continue
@@ -86,51 +86,62 @@ func handlePushEvent(rw http.ResponseWriter, r *http.Request) {
 
 // unblockReviewBlocker returns
 //
-//   true,  nil - success
-//   false, nil - unknown review blocker number
-//   false, err - something exploded
+//   issue, blocker, nil - success
+//   nil,   nil,     nil - unknown review blocker number
+//   nil,   nil,     err - something exploded
 func unblockReviewBlocker(
 	owner string,
 	repo string,
 	commit *github.PushEventCommit,
 	blockerNum int,
-) (updated bool, err error) {
+) (*github.Issue, *issues.ReviewBlockerItem, error) {
 
 	// Get GitHub API client.
 	client, err := githubutils.NewClient()
 	if err != nil {
-		return false, err
+		return nil, nil, err
 	}
 
 	// Find the review assue where the commit is registered.
-	issue, err := issues.FindReviewIssueForCommit(client, owner, repo, *commit.SHA)
+	commitTitle, err := bufio.NewReader(strings.NewReader(*commit.Message)).ReadString('\n')
 	if err != nil {
-		return false, err
+		return nil, nil, err
+	}
+
+	issue, err := issues.FindIssueForCommitItem(client, owner, repo, *commit.SHA, commitTitle)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	reviewIssue, err := issues.ParseReviewIssue(issue)
+	if err != nil {
+		return nil, nil, err
 	}
 
 	// Find the relevant blocker item and mark it as unblocked.
-	blockers := issue.ReviewBlockers()
+	blockers := reviewIssue.ReviewBlockerItems()
 	if len(blockers) < blockerNum {
-		// Invalid blocker number.
-		return false, nil
+		// Unknown blocker number.
+		return nil, nil, nil
 	}
-	blocker = blockers[blockerNum-1]
+	blocker := blockers[blockerNum-1]
 	blocker.Fixed = true
 
-	_, _, err = client.Issues.Edit(owner, repo, *issue.Number, &github.IssueRequest{
-		Body: github.String(issue.FormatBody()),
+	newIssue, _, err := client.Issues.Edit(owner, repo, *issue.Number, &github.IssueRequest{
+		Body: github.String(reviewIssue.FormatBody()),
 	})
 	if err != nil {
-		return false, err
+		return nil, nil, err
 	}
-	return true, nil
+	return newIssue, blocker, nil
 }
 
 func addUnblockComment(
 	owner string,
 	repo string,
+	issueNum int,
+	blocker *issues.ReviewBlockerItem,
 	commit *github.PushEventCommit,
-	blockerNum int,
 ) error {
 
 	// Get GitHub API client.
@@ -142,9 +153,9 @@ func addUnblockComment(
 	// Add a comment to the review issue.
 	commentBody := fmt.Sprintf(
 		"Review blocker [[%v]](%v) was unblocked by commit %v (authored by %v).",
-		blockerNum, blocker.CommentURL, *commit.SHA, *commit.Author)
+		blocker.BlockerNumber, blocker.CommentURL, *commit.SHA, *commit.Author)
 
-	_, _, err = client.Issues.CreateComment(owner, repo, *issue.Number, &github.IssueComment{
+	_, _, err = client.Issues.CreateComment(owner, repo, issueNum, &github.IssueComment{
 		Body: github.String(commentBody),
 	})
 	return err
