@@ -111,6 +111,8 @@ func unblockReviewBlocker(
 		return nil, nil, err
 	}
 
+	fmt.Printlf("COMMIT %+v\n", commit)
+
 	issue, err := issues.FindIssueForCommitItem(client, owner, repo, *commit.SHA, commitTitle)
 	if err != nil {
 		return nil, nil, err
