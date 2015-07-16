@@ -42,7 +42,10 @@ func handlePushEvent(rw http.ResponseWriter, r *http.Request) {
 			}
 			cmd := word[1:]
 			switch cmd {
-			case "unblock":
+			case "fixCommit":
+				// arg 1: SHA of the commit being fixed
+				// arg 2: blocker number
+
 				// Get the argument.
 				if !scanner.Scan() {
 					log.Warn(r, "EOF encountered while getting !unblock argument")
@@ -76,6 +79,8 @@ func handlePushEvent(rw http.ResponseWriter, r *http.Request) {
 
 				log.Info(r, "Review blocker %v for issue %v marked as unblocked",
 					blocker.BlockerNumber, *issue.HTMLURL)
+			case "fixStory":
+				// arg 1: blocker number
 			}
 		}
 		if err := scanner.Err(); err != nil {
