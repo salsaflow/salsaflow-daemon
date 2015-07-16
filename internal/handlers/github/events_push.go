@@ -28,8 +28,6 @@ func handlePushEvent(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Printf("%+v\n", event)
-
 	// Go through the commits and search for SalsaFlow commands.
 	for _, commit := range event.Commits {
 		scanner := bufio.NewScanner(strings.NewReader(*commit.Message))
@@ -57,7 +55,7 @@ func handlePushEvent(rw http.ResponseWriter, r *http.Request) {
 				}
 
 				// Mark the relevant review blocker as unblocked.
-				owner, repo := *event.Repo.Owner.Login, *event.Repo.Name
+				owner, repo := *event.Repo.Owner.Name, *event.Repo.Name
 				issue, blocker, err := unblockReviewBlocker(owner, repo, &commit, blockerNum)
 				if err != nil {
 					log.Error(r, err)
@@ -75,6 +73,9 @@ func handlePushEvent(rw http.ResponseWriter, r *http.Request) {
 					log.Error(r, err)
 					continue
 				}
+
+				log.Info(r, "Review blocker %v for issue %v marked as unblocked",
+					blocker.BlockerNumber, *issue.HTMLURL)
 			}
 		}
 		if err := scanner.Err(); err != nil {
