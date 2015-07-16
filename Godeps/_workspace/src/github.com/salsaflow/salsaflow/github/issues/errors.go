@@ -47,3 +47,15 @@ type ErrTagNotFound struct {
 func (err *ErrTagNotFound) Error() string {
 	return fmt.Sprintf("issue %v: tag not found: %v", *err.issue.HTMLURL, err.tag)
 }
+
+// ErrReviewIssueNotFound is returned from FindReviewIssueForCommit
+// when it is not possible to get the single review issue for the given commit.
+type ErrReviewIssueNotFound struct {
+	CommitSHA string
+	Result    *github.IssuesSearchResult
+}
+
+func (err *ErrReviewIssueNotFound) Error() string {
+	return fmt.Sprintf("failed to locate review issue for commit %v (%v candidates found)",
+		err.CommitSHA, *err.Result.Total)
+}
