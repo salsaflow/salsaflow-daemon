@@ -77,6 +77,8 @@ func (handler *Handler) handleEvent(rw http.ResponseWriter, r *http.Request) {
 		handler.handleCommitComment(rw, r)
 	case "issues":
 		handler.handleIssuesEvent(rw, r)
+	case "push":
+		handlePushEvent(rw, r)
 	default:
 		httpStatus(rw, http.StatusAccepted)
 	}
