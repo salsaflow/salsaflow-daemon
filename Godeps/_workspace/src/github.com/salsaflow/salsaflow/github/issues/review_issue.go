@@ -59,6 +59,7 @@ func FindIssueForCommitItem(
 	// Find the relevant review issue.
 	// We need to iterate since the result is paginated.
 	pattern := fmt.Sprintf("] %v: %v", commitSHA[:7], commitTitle)
+	fmt.Println("PATTERN:", pattern)
 
 	query := fmt.Sprintf(
 		`"%v" repo:"%v/%v" label:review type:issue in:body`, pattern, owner, repo)
