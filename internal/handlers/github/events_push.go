@@ -4,6 +4,7 @@ import (
 	// Stdlib
 	"bufio"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -132,13 +133,19 @@ func addUnblockComment(
 	blockerNum int,
 ) error {
 
+	// Get GitHub API client.
+	client, err := githubutils.NewClient()
+	if err != nil {
+		return err
+	}
+
 	// Add a comment to the review issue.
 	commentBody := fmt.Sprintf(
 		"Review blocker [[%v]](%v) was unblocked by commit %v (authored by %v).",
 		blockerNum, blocker.CommentURL, *commit.SHA, *commit.Author)
 
-	_, _, err := client.Issues.CreateComment(owner, repo, *issue.Number, &github.IssueComment{
-		Body: github.Strng(commentBody),
+	_, _, err = client.Issues.CreateComment(owner, repo, *issue.Number, &github.IssueComment{
+		Body: github.String(commentBody),
 	})
 	return err
 }
