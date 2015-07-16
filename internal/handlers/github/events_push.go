@@ -10,10 +10,12 @@ import (
 
 	// Internal
 	"github.com/salsaflow/salsaflow-daemon/internal/log"
+	"github.com/salsaflow/salsaflow-daemon/internal/utils/githubutils"
 	"github.com/salsaflow/salsaflow-daemon/internal/utils/httputils"
 
 	// Vendor
 	"github.com/google/go-github/github"
+	"github.com/salsaflow/salsaflow/github/issues"
 )
 
 func handlePushEvent(rw http.ResponseWriter, r *http.Request) {
@@ -47,14 +49,28 @@ func handlePushEvent(rw http.ResponseWriter, r *http.Request) {
 				}
 				blockerNum, err := strconv.Atoi(scanner.Text())
 				if err != nil {
-					log.Warn(r, "!unblock argument is not a number: %v", err)
+					log.Warn(r, "!unblock: argument is not a number: %v", err)
 					continue Scanning
 				}
 
 				// Mark the relevant review blocker as unblocked.
 				owner, repo := *event.Repo.Owner.Login, *event.Repo.Name
-				if err := unblockReviewIssue(owner, repo, &commit, blockerNum); err != nil {
+				updated, err := unblockReviewBlocker(owner, repo, &commit, blockerNum)
+				if err != nil {
 					log.Error(r, err)
+					continue
+				}
+				if !updated {
+					log.Warn(r, "!unblock: unknown blocker number [commit=%v, blocker=%v]",
+						*commit.SHA, blockerNum)
+					continue
+				}
+
+				// Add a comment to the review issue.
+				err = addUnblockComment(owner, repo, &commit, blockerNum)
+				if err != nil {
+					log.Error(r, err)
+					continue
 				}
 			}
 		}
@@ -67,6 +83,62 @@ func handlePushEvent(rw http.ResponseWriter, r *http.Request) {
 	httpStatus(rw, http.StatusAccepted)
 }
 
-func unblockReviewIssue(owner, repo string, commit *github.PushEventCommit, blockerNum int) error {
-	panic("Not implemented")
+// unblockReviewBlocker returns
+//
+//   true,  nil - success
+//   false, nil - unknown review blocker number
+//   false, err - something exploded
+func unblockReviewBlocker(
+	owner string,
+	repo string,
+	commit *github.PushEventCommit,
+	blockerNum int,
+) (updated bool, err error) {
+
+	// Get GitHub API client.
+	client, err := githubutils.NewClient()
+	if err != nil {
+		return false, err
+	}
+
+	// Find the review assue where the commit is registered.
+	issue, err := issues.FindReviewIssueForCommit(client, owner, repo, *commit.SHA)
+	if err != nil {
+		return false, err
+	}
+
+	// Find the relevant blocker item and mark it as unblocked.
+	blockers := issue.ReviewBlockers()
+	if len(blockers) < blockerNum {
+		// Invalid blocker number.
+		return false, nil
+	}
+	blocker = blockers[blockerNum-1]
+	blocker.Fixed = true
+
+	_, _, err = client.Issues.Edit(owner, repo, *issue.Number, &github.IssueRequest{
+		Body: github.String(issue.FormatBody()),
+	})
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func addUnblockComment(
+	owner string,
+	repo string,
+	commit *github.PushEventCommit,
+	blockerNum int,
+) error {
+
+	// Add a comment to the review issue.
+	commentBody := fmt.Sprintf(
+		"Review blocker [[%v]](%v) was unblocked by commit %v (authored by %v).",
+		blockerNum, blocker.CommentURL, *commit.SHA, *commit.Author)
+
+	_, _, err := client.Issues.CreateComment(owner, repo, *issue.Number, &github.IssueComment{
+		Body: github.Strng(commentBody),
+	})
+	return err
 }
