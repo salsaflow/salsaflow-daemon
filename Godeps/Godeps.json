@@ -25,8 +25,8 @@
 		},
 		{
 			"ImportPath": "github.com/salsaflow/salsaflow/github/issues",
-			"Comment": "v0.2.0-568-g113a70c",
-			"Rev": "113a70cb41a70b57859a4ba4ad493e306e513013"
+			"Comment": "v0.2.0-577-g16dd963",
+			"Rev": "16dd96319e237b3a9fdb9adfe6901767344abeac"
 		},
 		{
 			"ImportPath": "github.com/salsita/go-jira/v2/jira",
