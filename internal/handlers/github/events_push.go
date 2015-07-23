@@ -21,7 +21,7 @@ import (
 
 func handlePushEvent(rw http.ResponseWriter, r *http.Request) {
 	// Parse the payload.
-	var event github.PushEvent
+	var event github.WebhookPayload
 	if err := json.NewDecoder(r.Body).Decode(&event); err != nil {
 		log.Warn(r, "failed to parse event: %v", err)
 		httpStatus(rw, http.StatusBadRequest)
@@ -80,6 +80,7 @@ func handlePushEvent(rw http.ResponseWriter, r *http.Request) {
 				log.Info(r, "Review blocker %v for issue %v marked as unblocked",
 					blocker.BlockerNumber, *issue.HTMLURL)
 			case "fixStory":
+				// Story tag taken from the commit message tag.
 				// arg 1: blocker number
 			}
 		}
