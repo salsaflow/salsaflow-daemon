@@ -92,7 +92,7 @@ func pruneLabels(labels []*pivotal.Label) []*pivotal.Label {
 		case config.TestingFailedLabel:
 		case config.ImplementedLabel:
 		default:
-			ls = append(labels, &pivotal.Label{
+			ls = append(ls, &pivotal.Label{
 				Id: label.Id,
 			})
 		}
