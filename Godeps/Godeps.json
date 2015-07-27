@@ -1,5 +1,5 @@
 {
-	"ImportPath": "github.com/tchap/salsaflow-daemon",
+	"ImportPath": "github.com/salsaflow/salsaflow-daemon",
 	"GoVersion": "go1.4.2",
 	"Packages": [
 		"./..."
@@ -25,11 +25,11 @@
 		},
 		{
 			"ImportPath": "github.com/salsita/go-jira/v2/jira",
-			"Rev": "6564b5bc5adce91f3d465b3cd95f09a524b03440"
+			"Rev": "96f003574571a8b744e2f2a6df6fe52dd1d09c4c"
 		},
 		{
 			"ImportPath": "github.com/salsita/go-pivotaltracker/v5/pivotal",
-			"Rev": "06c120eb050c14517c7928d0e8009a95870bf868"
+			"Rev": "c0f7a1cefce399e2fe46024b4d0dd8b5a159c7af"
 		},
 		{
 			"ImportPath": "github.com/tchap/oauth",
