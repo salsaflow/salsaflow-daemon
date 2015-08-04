@@ -97,7 +97,7 @@ func handleIssuesEvent(rw http.ResponseWriter, r *http.Request) {
 		panic("unreachable code reached")
 	}
 	if ex != nil {
-		httputils.Error(rw, r, err)
+		httputils.Error(rw, r, ex)
 		return
 	}
 
