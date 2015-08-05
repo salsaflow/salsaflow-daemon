@@ -8,6 +8,7 @@ import (
 	// Internal
 	"github.com/salsaflow/salsaflow-daemon/internal/handlers/github"
 	"github.com/salsaflow/salsaflow-daemon/internal/handlers/jira"
+	"github.com/salsaflow/salsaflow-daemon/internal/handlers/pivotaltracker"
 
 	// Vendor
 	"github.com/codegangsta/negroni"
@@ -23,6 +24,13 @@ func main() {
 		githubOptions = append(githubOptions, github.SetSecret(secret))
 	}
 	mux.Handle("/events/github", github.NewHandler(githubOptions...))
+
+	// Register Pivotal Tracker handlers.
+	var ptOptions []pivotaltracker.OptionFunc
+	if secret := os.Getenv("PIVOTALTRACKER_SECRET"); secret != "" {
+		ptOptions = append(ptOptions, pivotaltracker.SetSecret(secret))
+	}
+	mux.Handle("/events/pivotaltracker", pivotaltracker.NewHandler(ptOptions...))
 
 	// Register JIRA testing handler.
 	mux.Handle("/jira/me", jira.NewMeHandler())

@@ -21,7 +21,7 @@ func handleIssuesEvent(rw http.ResponseWriter, r *http.Request) {
 	var event github.IssueActivityEvent
 	if err := json.NewDecoder(r.Body).Decode(&event); err != nil {
 		log.Warn(r, "failed to parse event: %v", err)
-		httpStatus(rw, http.StatusBadRequest)
+		httputils.Status(rw, http.StatusBadRequest)
 		return
 	}
 	issue := event.Issue
@@ -35,7 +35,7 @@ func handleIssuesEvent(rw http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if !isReviewIssue {
-		httpStatus(rw, http.StatusAccepted)
+		httputils.Status(rw, http.StatusAccepted)
 		return
 	}
 
@@ -45,7 +45,7 @@ func handleIssuesEvent(rw http.ResponseWriter, r *http.Request) {
 	case "closed":
 	case "reopened":
 	default:
-		httpStatus(rw, http.StatusAccepted)
+		httputils.Status(rw, http.StatusAccepted)
 		return
 	}
 
@@ -53,14 +53,14 @@ func handleIssuesEvent(rw http.ResponseWriter, r *http.Request) {
 	reviewIssue, err := issues.ParseReviewIssue(issue)
 	if err != nil {
 		log.Error(r, err)
-		httpStatus(rw, statusUnprocessableEntity)
+		httputils.Status(rw, httputils.StatusUnprocessableEntity)
 		return
 	}
 
 	// We are done in case this is a commit review issue.
 	storyIssue, ok := reviewIssue.(*issues.StoryReviewIssue)
 	if !ok {
-		httpStatus(rw, http.StatusAccepted)
+		httputils.Status(rw, http.StatusAccepted)
 		return
 	}
 
@@ -68,7 +68,7 @@ func handleIssuesEvent(rw http.ResponseWriter, r *http.Request) {
 	tracker, err := trackers.GetIssueTracker(storyIssue.TrackerName)
 	if err != nil {
 		log.Error(r, err)
-		httpStatus(rw, statusUnprocessableEntity)
+		httputils.Status(rw, httputils.StatusUnprocessableEntity)
 		return
 	}
 
@@ -76,7 +76,7 @@ func handleIssuesEvent(rw http.ResponseWriter, r *http.Request) {
 	story, err := tracker.FindStoryByTag(storyIssue.StoryKey)
 	if err != nil {
 		log.Error(r, err)
-		httpStatus(rw, statusUnprocessableEntity)
+		httputils.Status(rw, httputils.StatusUnprocessableEntity)
 		return
 	}
 
@@ -108,5 +108,5 @@ func handleIssuesEvent(rw http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	httpStatus(rw, http.StatusAccepted)
+	httputils.Status(rw, http.StatusAccepted)
 }

@@ -1,13 +1,7 @@
-package github
+package pivotaltracker
 
 import (
 	// Stdlib
-	"bytes"
-	"crypto/hmac"
-	"crypto/sha1"
-	"encoding/hex"
-	"io"
-	"io/ioutil"
 	"net/http"
 
 	// Internal
@@ -17,6 +11,8 @@ import (
 	// Vendor
 	"github.com/codegangsta/negroni"
 )
+
+const SecretQueryParameter = "secret"
 
 type Handler struct {
 	// Embedded http.Handler
@@ -56,44 +52,18 @@ func NewHandler(options ...OptionFunc) http.Handler {
 }
 
 func (handler *Handler) handleEvent(rw http.ResponseWriter, r *http.Request) {
-	eventType := r.Header.Get("X-Github-Event")
-	switch eventType {
-	case "commit_comment":
-		handleCommitComment(rw, r)
-	case "issues":
-		handleIssuesEvent(rw, r)
-	default:
-		httputils.Status(rw, http.StatusAccepted)
-	}
+	handleActivity(rw, r)
 }
 
 func newSecretMiddleware(secret string) negroni.HandlerFunc {
 	return negroni.HandlerFunc(
 		func(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-			// Read the request body into a buffer.
-			bodyBytes, err := ioutil.ReadAll(r.Body)
-			if err != nil {
-				httputils.Error(rw, r, err)
-				return
-			}
+			// Check the secret query parameter.
+			secretParam := r.URL.Query().Get(SecretQueryParameter)
 
-			// Fill the request body again so that it is available in the next handler.
-			r.Body.Close()
-			r.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
-
-			// Compute the hash.
-			mac := hmac.New(sha1.New, []byte(secret))
-			if _, err := io.Copy(mac, bytes.NewReader(bodyBytes)); err != nil {
-				httputils.Error(rw, r, err)
-				return
-			}
-
-			// Compare with the header provided in the request.
-			secretHeader := r.Header.Get("X-Hub-Signature")
-			expected := "sha1=" + hex.EncodeToString(mac.Sum(nil))
-			if secretHeader != expected {
-				log.Warn(r, "HMAC mismatch detected: expected='%v', got='%v'\n",
-					expected, secretHeader)
+			if secretParam != secret {
+				log.Warn(r, "webhook secret mismatch: expected='%v', got='%v'\n",
+					secretParam, secret)
 				httputils.Status(rw, http.StatusUnauthorized)
 				return
 			}

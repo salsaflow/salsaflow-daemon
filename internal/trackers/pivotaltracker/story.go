@@ -23,8 +23,8 @@ func (s *commonStory) OnReviewRequestClosed(rrID, rrURL string) error {
 
 func (s *commonStory) OnReviewRequestReopened(rrID, rrURL string) error {
 	// Prune workflow labels.
-	// Reset to started.
-	state := pivotal.StoryStateStarted
+	// Reset to finished.
+	state := pivotal.StoryStateFinished
 	labels := pruneLabels(s.story.Labels)
 
 	// Update the story.
@@ -47,8 +47,8 @@ func (s *commonStory) MarkAsReviewed() error {
 
 	// Prune workflow labels.
 	// Add the reviewed label.
-	// Reset to started.
-	state := pivotal.StoryStateStarted
+	// Reset to finished.
+	state := pivotal.StoryStateFinished
 	labels := append(pruneLabels(s.story.Labels), &pivotal.Label{
 		Name: config.ReviewedLabel,
 	})
@@ -88,9 +88,9 @@ func pruneLabels(labels []*pivotal.Label) []*pivotal.Label {
 	for _, label := range labels {
 		switch label.Name {
 		case config.ReviewedLabel:
+		case config.ReviewSkippedLabel:
 		case config.TestingPassedLabel:
 		case config.TestingFailedLabel:
-		case config.ImplementedLabel:
 		default:
 			ls = append(ls, &pivotal.Label{
 				Id: label.Id,
