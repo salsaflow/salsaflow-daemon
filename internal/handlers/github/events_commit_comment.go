@@ -29,7 +29,7 @@ func handleCommitComment(rw http.ResponseWriter, r *http.Request) {
 	var event commitCommentEvent
 	if err := json.NewDecoder(r.Body).Decode(&event); err != nil {
 		log.Warn(r, "failed to parse event: %v", err)
-		httpStatus(rw, http.StatusBadRequest)
+		httputils.Status(rw, http.StatusBadRequest)
 		return
 	}
 
@@ -67,7 +67,7 @@ func handleCommitComment(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	httpStatus(rw, http.StatusAccepted)
+	httputils.Status(rw, http.StatusAccepted)
 }
 
 func createReviewBlockerFromCommitComment(

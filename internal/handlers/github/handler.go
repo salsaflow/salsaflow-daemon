@@ -63,7 +63,7 @@ func (handler *Handler) handleEvent(rw http.ResponseWriter, r *http.Request) {
 	case "issues":
 		handleIssuesEvent(rw, r)
 	default:
-		httpStatus(rw, http.StatusAccepted)
+		httputils.Status(rw, http.StatusAccepted)
 	}
 }
 
@@ -94,7 +94,7 @@ func newSecretMiddleware(secret string) negroni.HandlerFunc {
 			if secretHeader != expected {
 				log.Warn(r, "HMAC mismatch detected: expected='%v', got='%v'\n",
 					expected, secretHeader)
-				httpStatus(rw, http.StatusUnauthorized)
+				httputils.Status(rw, http.StatusUnauthorized)
 				return
 			}
 
