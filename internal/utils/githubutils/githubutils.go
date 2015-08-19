@@ -12,7 +12,7 @@ import (
 	"golang.org/x/oauth2"
 )
 
-const EnvAccessToken = "GITHUB_ACCESS_TOKEN"
+const EnvAccessToken = "SFD_GH_TOKEN"
 
 func NewClient() (client *github.Client, err error) {
 	token := os.Getenv(EnvAccessToken)
