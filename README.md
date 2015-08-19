@@ -40,6 +40,10 @@ need to point relevant webhook to the right endpoint.
 
 Server-side counterpart of Salsita's Pivotal Tracker issue tracker module.
 
+This endpoint performs the following actions:
+
+* When a rejected story is detected, it remotes all review and QA labels.
+
 This endpoint expects Pivotal Tracker `v5` activity webhooks.
 
 #### Setup
@@ -64,6 +68,13 @@ will be automatically rejected.
 ### `/codereview/github/events`
 
 Server-side counterpart of Salsita's GitHub code review module.
+
+This endpoint performs the following actions:
+
+* When a GitHub review issue is closed, it marks relevant issue as reviewed.
+* When the review issue is re-opened again, it resets the associated story
+  back to the state representing the fact that the story is being reviewed.
+* It processes commands in GitHub commit comments, particularly `!blocker`.
 
 #### Setup
 
