@@ -11,15 +11,15 @@ The following environment variables can be used to configure `salsaflow-daemon`.
 ### Pivotal Tracker-related Logic
 
 * `PIVOTALTRACKER_ACCESS_TOKEN` - Pivotal Tracker access token
-* `PIVOTALTRACKER_REVIEWED_LABEL` - the label used to mark PT stories as reviewed
-* `PIVOTALTRACKER_SKIP_REVIEW_LABEL` - the label used to say that the PT story doesn't need review
-* `PIVOTALTRACKER_PASSED_TESTING_LABEL` - the label used to mark PT story as passing QA
-* `PIVOTALTRACKER_FAILED_TESTING_LABEL` - the label used to mark PT story as failing QA
-* `PIVOTALTRACKER_SKIP_TESTING_LABEL` - the label used to say that the PT story doesn't need QA
+* `PIVOTALTRACKER_REVIEWED_LABEL` - the label marking PT stories as reviewed
+* `PIVOTALTRACKER_SKIP_REVIEW_LABEL` - the label saying that PT story doesn't need review
+* `PIVOTALTRACKER_PASSED_TESTING_LABEL` - the label marking PT story as passing QA
+* `PIVOTALTRACKER_FAILED_TESTING_LABEL` - the label marking PT story as failing QA
+* `PIVOTALTRACKER_SKIP_TESTING_LABEL` - the label saying that PT story doesn't need QA
 
 ### JIRA-related Logic
 
-* `JIRA_BASE_URL` - JIRA API address, e.g. `https://jira.example.com/rest/api/2/`
+* `JIRA_API_BASE_URL` - JIRA API address, e.g. `https://jira.example.com/rest/api/2/`
 * `JIRA_OAUTH_ACCESS_TOKEN` - JIRA OAuth access token
 * `JIRA_OAUTH_CONSUMER_KEY` - JIRA OAuth consumer key
 * `JIRA_OAUTH_PRIVATE_KEY` - JIRA OAuth RSA private key
@@ -74,7 +74,7 @@ the following variables are required:
 In case you are using JIRA as the issue tracker,
 the following variables are required:
 
-* `JIRA_BASE_URL`
+* `JIRA_API_BASE_URL`
 * `JIRA_OAUTH_ACCESS_TOKEN`
 * `JIRA_OAUTH_CONSUMER_KEY`
 * `JIRA_OAUTH_PRIVATE_KEY`
