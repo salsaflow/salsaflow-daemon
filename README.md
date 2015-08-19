@@ -11,6 +11,7 @@ The following environment variables can be used to configure `salsaflow-daemon`.
 ### Pivotal Tracker-related Logic
 
 * `PIVOTALTRACKER_ACCESS_TOKEN` - Pivotal Tracker access token
+* `PIVOTALTRACKER_SECRET` - secret used to authenticate incoming webhooks
 * `PIVOTALTRACKER_REVIEWED_LABEL` - the label marking PT stories as reviewed
 * `PIVOTALTRACKER_SKIP_REVIEW_LABEL` - the label saying that PT story doesn't need review
 * `PIVOTALTRACKER_PASSED_TESTING_LABEL` - the label marking PT story as passing QA
@@ -32,11 +33,14 @@ The following environment variables can be used to configure `salsaflow-daemon`.
 ## Endpoints
 
 Each endpoint represents certain piece of functionality that you might want to
-enable for your SalsaFlow-enabled project.
+enable for your SalsaFlow-enabled project. To enable the functionality you simply
+need to point relevant webhook to the right endpoint.
 
 ### `/issuetracker/pivotaltracker/events`
 
 Server-side counterpart of Salsita's Pivotal Tracker issue tracker module.
+
+This endpoint expects Pivotal Tracker `v5` activity webhooks.
 
 #### Setup
 
@@ -46,11 +50,16 @@ Required environment variables:
 
 Optional environment variables:
 
+* `PIVOTALTRACKER_SECRET` (highly recommended to set this variable)
 * `PIVOTALTRACKER_REVIEWED_LABEL` (default `reviewed`)
 * `PIVOTALTRACKER_SKIP_REVIEW_LABEL` (default `no review`)
 * `PIVOTALTRACKER_PASSED_TESTING_LABEL` (default `qa+`)
 * `PIVOTALTRACKER_FAILED_TESTING_LABEL` (default `qa-`)
 * `PIVOTALTRACKER_SKIP_TESTING_LABEL` (default `no qa`)
+
+In case you decide to set `PIVOTALTRACKER_SECRET`, append `?secret=<secret-value>`
+to the webhook destination URL. Incoming webhooks missing this parameter
+will be automatically rejected.
 
 ### `/codereview/github/events`
 
