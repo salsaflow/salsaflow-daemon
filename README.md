@@ -72,6 +72,7 @@ Server-side counterpart of Salsita's GitHub code review module.
 This endpoint performs the following actions:
 
 * When a GitHub review issue is closed, it marks relevant issue as reviewed.
+  What that means depends on the associated issue tracker.
 * When the review issue is re-opened again, it resets the associated story
   back to the state representing the fact that the story is being reviewed.
 * It processes commands in GitHub commit comments, particularly `!blocker`.
