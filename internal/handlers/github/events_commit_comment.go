@@ -49,7 +49,7 @@ func handleCommitComment(rw http.ResponseWriter, r *http.Request) {
 
 		var err error
 		switch cmd {
-		case "blocker":
+		case "mustfix":
 			err = createReviewBlockerFromCommitComment(
 				r,
 				*event.Repository.Owner.Login,
