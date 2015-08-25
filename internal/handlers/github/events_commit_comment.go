@@ -3,6 +3,7 @@ package github
 import (
 	// Stdlib
 	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -120,11 +121,14 @@ func createReviewBlockerFromCommitComment(
 	log.Info(r, "Linked a new review comment to review issue %v/%v#%v", owner, repo, issueNum)
 
 	// Add the blocker comment.
-	body := fmt.Sprintf("A new [review blocker](%v) was opened by @%v for review issue #%v.",
+	var bodyBuffer bytes.Buffer
+	fmt.Fprintf(&bodyBuffer,
+		"A new [review blocker](%v) was opened by @%v for review issue #%v.\n",
 		commentURL, commentAuthor, issueNum)
+	fmt.Fprintf(&bodyBuffer, "Summary: %v\n", blockerSummary)
 
 	_, _, err = client.Issues.CreateComment(owner, repo, issueNum, &github.IssueComment{
-		Body: github.String(body),
+		Body: github.String(bodyBuffer.String()),
 	})
 	return err
 }
