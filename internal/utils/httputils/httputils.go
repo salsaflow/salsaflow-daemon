@@ -21,7 +21,13 @@ func Status(rw http.ResponseWriter, status int) {
 		http.Error(rw, http.StatusText(status), status)
 	}
 }
+
 func Error(rw http.ResponseWriter, r *http.Request, err error) {
 	Status(rw, http.StatusInternalServerError)
-	log.Error(r, err)
+
+	// We want to mention the function that called Error,
+	// hence we have to increase the number of skipped callers.
+	logger := log.NewLogger()
+	logger.IncreaseSkippedCallers()
+	logger.Error(r, err)
 }
