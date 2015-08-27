@@ -9,6 +9,7 @@ import (
 	// Internal
 	"github.com/salsaflow/salsaflow-daemon/internal/log"
 	"github.com/salsaflow/salsaflow-daemon/internal/trackers"
+	"github.com/salsaflow/salsaflow-daemon/internal/utils/githubutils"
 	"github.com/salsaflow/salsaflow-daemon/internal/utils/httputils"
 
 	// Vendor
@@ -24,9 +25,26 @@ func handleIssuesEvent(rw http.ResponseWriter, r *http.Request) {
 		httputils.Status(rw, http.StatusBadRequest)
 		return
 	}
-	issue := event.Issue
 
 	// Make sure this is a review issue event.
+	// The label is sometimes missing in the webhook, we need to re-fetch.
+	client, err := githubutils.NewClient()
+	if err != nil {
+		httputils.Error(rw, r, err)
+		return
+	}
+	var (
+		owner    = *event.Repo.Owner.Login
+		repo     = *event.Repo.Name
+		issueNum = *event.Issue.Number
+	)
+	log.Info(r, "Re-fetching issue %v/%v#%v", owner, repo, issueNum)
+	issue, _, err := client.Issues.Get(owner, repo, issueNum)
+	if err != nil {
+		httputils.Error(rw, r, err)
+		return
+	}
+
 	var isReviewIssue bool
 	for _, label := range issue.Labels {
 		if *label.Name == "review" {
@@ -35,6 +53,7 @@ func handleIssuesEvent(rw http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if !isReviewIssue {
+		log.Info(r, "Issue %s is not a review issue", *issue.HTMLURL)
 		httputils.Status(rw, http.StatusAccepted)
 		return
 	}
@@ -82,17 +101,17 @@ func handleIssuesEvent(rw http.ResponseWriter, r *http.Request) {
 
 	// Invoke relevant event handler.
 	var (
-		issueNum = strconv.Itoa(*issue.Number)
-		issueURL = *issue.HTMLURL
-		ex       error
+		issueNumString = strconv.Itoa(*issue.Number)
+		issueURL       = *issue.HTMLURL
+		ex             error
 	)
 	switch *event.Action {
 	case "opened":
-		ex = story.OnReviewRequestOpened(issueNum, issueURL)
+		ex = story.OnReviewRequestOpened(issueNumString, issueURL)
 	case "closed":
-		ex = story.OnReviewRequestClosed(issueNum, issueURL)
+		ex = story.OnReviewRequestClosed(issueNumString, issueURL)
 	case "reopened":
-		ex = story.OnReviewRequestReopened(issueNum, issueURL)
+		ex = story.OnReviewRequestReopened(issueNumString, issueURL)
 	default:
 		panic("unreachable code reached")
 	}

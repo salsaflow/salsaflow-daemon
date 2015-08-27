@@ -83,7 +83,7 @@ func (s *commonStory) OnReviewRequestReopened(rrID, rrURL string) error {
 	}
 	// No need to do anything really, everything is in OnReviewRequestClosed.
 
-	// Mark the link as resolved.
+	// Mark the link as unresolved.
 	return s.setRemoteLinkResolved(rrID, rrURL, false)
 }
 
