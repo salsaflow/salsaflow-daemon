@@ -152,7 +152,11 @@ func (s *commonStory) markIssueAsReviewed() error {
 
 	// In case the issue is Implemented, we proceed with the transition.
 	case statusIdImplemented:
-		_, err := s.client.Issues.PerformTransition(s.issue.Key, transitionIdMarkAsReviewed)
+		_, err := s.client.Issues.PerformTransition(s.issue.Key, jira.M{
+			"transition": jira.M{
+				"id": transitionIdMarkAsReviewed,
+			},
+		})
 		return err
 
 	// By default we log a warning and return.
