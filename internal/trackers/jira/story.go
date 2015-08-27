@@ -95,6 +95,8 @@ func (s *commonStory) MarkAsReviewed() error {
 // Internal methods ------------------------------------------------------------
 
 func (s *commonStory) setRemoteLinkResolved(rrID, rrURL string, resolved bool) error {
+	log.Printf("JIRA: Setting remote link resolution to %v for %v\n", resolved, rrURL)
+
 	// Prepare the update object.
 	var update jira.RemoteIssueLink
 	update.GlobalId = rrURL
@@ -115,6 +117,7 @@ func (s *commonStory) setRemoteLinkResolved(rrID, rrURL string, resolved bool) e
 }
 
 func (s *commonStory) createRemoteLink(link *jira.RemoteIssueLink) error {
+	log.Printf("JIRA: Creating a remote link: %+v\n", *link)
 	_, err := s.client.RemoteIssueLinks.Create(s.issue.Key, link)
 	return err
 }
@@ -125,6 +128,7 @@ func (s *commonStory) listRemoteLinks() ([]*jira.RemoteIssueLink, error) {
 }
 
 func (s *commonStory) updateRemoteLink(link *jira.RemoteIssueLink) error {
+	log.Printf("JIRA: Updating a remote link: %+v\n", *link)
 	_, err := s.client.RemoteIssueLinks.Update(s.issue.Key, link)
 	return err
 }
@@ -152,6 +156,7 @@ func (s *commonStory) markIssueAsReviewed() error {
 
 	// In case the issue is Implemented, we proceed with the transition.
 	case statusIdImplemented:
+		log.Printf("JIRA: Marking issues %v as reviewed\n", s.issue.Key)
 		_, err := s.client.Issues.PerformTransition(s.issue.Key, jira.M{
 			"transition": jira.M{
 				"id": transitionIdMarkAsReviewed,
