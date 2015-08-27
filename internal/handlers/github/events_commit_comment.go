@@ -123,9 +123,9 @@ func createReviewBlockerFromCommitComment(
 	// Add the blocker comment.
 	var bodyBuffer bytes.Buffer
 	fmt.Fprintf(&bodyBuffer,
-		"A new [review blocker](%v) was opened by @%v for review issue #%v.\n",
+		"A new [review blocker](%v) was opened by @%v for review issue #%v. The summary follows:\n",
 		commentURL, commentAuthor, issueNum)
-	fmt.Fprintf(&bodyBuffer, "Summary: %v\n", blockerSummary)
+	fmt.Fprintf(&bodyBuffer, "> %v\n", blockerSummary)
 
 	_, _, err = client.Issues.CreateComment(owner, repo, issueNum, &github.IssueComment{
 		Body: github.String(bodyBuffer.String()),
