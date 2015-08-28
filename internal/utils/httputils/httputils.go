@@ -27,7 +27,5 @@ func Error(rw http.ResponseWriter, r *http.Request, err error) {
 
 	// We want to mention the function that called Error,
 	// hence we have to increase the number of skipped callers.
-	logger := log.NewLogger()
-	logger.IncreaseSkippedCallers()
-	logger.Error(r, err)
+	log.NewLogger().IncreaseSkippedCallers().Error(r, err)
 }
