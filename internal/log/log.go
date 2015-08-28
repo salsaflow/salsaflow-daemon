@@ -5,10 +5,9 @@ import (
 	"log"
 	"net/http"
 	"runtime"
-	"sync"
 )
 
-const defaultSkipCallers = 4
+const defaultSkippedCallers = 4
 
 // We need to increase because this logger is called from exported functions
 // and we don't want to see these functions in the log statement, we want
@@ -28,31 +27,19 @@ func Error(req *http.Request, err error) {
 }
 
 type Logger struct {
-	mux         *sync.RWMutex
 	skipCallers int
 }
 
 func NewLogger() *Logger {
-	return newLogger(defaultSkipCallers)
-}
-
-func newLogger(skipCallers int) *Logger {
-	return &Logger{
-		mux:         &sync.RWMutex{},
-		skipCallers: skipCallers,
-	}
+	return &Logger{defaultSkippedCallers}
 }
 
 func (logger *Logger) IncreaseSkippedCallers() *Logger {
-	logger.mux.RLock()
-	defer logger.mux.RUnlock()
-	return newLogger(logger.skipCallers + 1)
+	return &Logger{logger.skipCallers + 1}
 }
 
 func (logger *Logger) DecreaseSkippedCallers() *Logger {
-	logger.mux.RLock()
-	defer logger.mux.RUnlock()
-	return newLogger(logger.skipCallers - 1)
+	return &Logger{logger.skipCallers - 1}
 }
 
 func (logger *Logger) Info(req *http.Request, format string, v ...interface{}) {
@@ -78,9 +65,6 @@ func (logger *Logger) printRecord(
 }
 
 func (logger *Logger) trace() string {
-	logger.mux.RLock()
-	defer logger.mux.RUnlock()
-
 	pc := make([]uintptr, 1)
 	runtime.Callers(logger.skipCallers, pc)
 	fn := runtime.FuncForPC(pc[0])
