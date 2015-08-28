@@ -12,3 +12,6 @@ jira:
 
 #-- CODE REVIEW TOOL
 code_review_tool: "github"
+
+#-- RELEASE NOTES
+release_notes: "github"
