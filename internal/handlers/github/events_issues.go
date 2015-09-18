@@ -2,7 +2,9 @@ package github
 
 import (
 	// Stdlib
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -45,14 +47,17 @@ func handleIssuesEvent(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var isReviewIssue bool
-	for _, label := range issue.Labels {
-		if *label.Name == "review" {
-			isReviewIssue = true
-			break
+	// Make sure this is a review issue.
+	labeledWith := func(label string) bool {
+		for _, labelPtr := range issue.Labels {
+			if *labelPtr.Name == label {
+				return true
+			}
 		}
+		return false
 	}
-	if !isReviewIssue {
+
+	if !labeledWith("review") {
 		log.Info(r, "Issue %s is not a review issue", *issue.HTMLURL)
 		httputils.Status(rw, http.StatusAccepted)
 		return
@@ -62,6 +67,12 @@ func handleIssuesEvent(rw http.ResponseWriter, r *http.Request) {
 	switch *event.Action {
 	case "opened":
 	case "closed":
+		// Make sure the issue is marked as implemented.
+		if !labeledWith("implemented") {
+			rejectClose(rw, r, client, &event)
+			return
+		}
+
 	case "reopened":
 	default:
 		httputils.Status(rw, http.StatusAccepted)
@@ -125,6 +136,50 @@ func handleIssuesEvent(rw http.ResponseWriter, r *http.Request) {
 			httputils.Error(rw, r, err)
 			return
 		}
+	}
+
+	httputils.Status(rw, http.StatusAccepted)
+}
+
+func rejectClose(
+	rw http.ResponseWriter,
+	r *http.Request,
+	client *github.Client,
+	event *github.IssueActivityEvent) {
+
+	var (
+		owner    = *event.Repo.Owner.Login
+		repo     = *event.Repo.Name
+		issueNum = *event.Issue.Number
+		sender   = *event.Sender.Login
+	)
+
+	// Log stuff.
+	log.Info(r, "Reopening review issue %v/%v#%v, not implemented yet", owner, repo, issueNum)
+
+	// Re-open the issue.
+	_, _, err := client.Issues.Edit(owner, repo, issueNum, &github.IssueRequest{
+		State: github.String("open"),
+	})
+	if err != nil {
+		httputils.Error(rw, r, err)
+		return
+	}
+
+	// Add a comment to notify the sender.
+	var body bytes.Buffer
+	fmt.Fprintf(&body,
+		"@%v Reopening review issue #%v, the associated story is not implemented yet.\n",
+		sender, issueNum)
+	fmt.Fprintln(&body,
+		"The review issue needs to be labeled with `implemented`, then it can be closed.")
+
+	_, _, err = client.Issues.CreateComment(owner, repo, issueNum, &github.IssueComment{
+		Body: github.String(body.String()),
+	})
+	if err != nil {
+		httputils.Error(rw, r, err)
+		return
 	}
 
 	httputils.Status(rw, http.StatusAccepted)
