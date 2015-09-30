@@ -38,22 +38,28 @@ func Process(prefix string, spec interface{}) error {
 	for i := 0; i < s.NumField(); i++ {
 		f := s.Field(i)
 		if f.CanSet() {
-			var fieldName string
-			var hasTag bool
 			alt := typeOfSpec.Field(i).Tag.Get("envconfig")
+			fieldName := typeOfSpec.Field(i).Name
 			if alt != "" {
 				fieldName = alt
-				hasTag = true
-			} else {
-				fieldName = typeOfSpec.Field(i).Name
 			}
 			key := strings.ToUpper(fmt.Sprintf("%s_%s", prefix, fieldName))
 			value := os.Getenv(key)
-			if value == "" && hasTag {
+			if value == "" && alt != "" {
 				key := strings.ToUpper(fieldName)
 				value = os.Getenv(key)
 			}
+
+			def := typeOfSpec.Field(i).Tag.Get("default")
+			if def != "" && value == "" {
+				value = def
+			}
+
+			req := typeOfSpec.Field(i).Tag.Get("required")
 			if value == "" {
+				if req == "true" {
+					return fmt.Errorf("required key %s missing value", key)
+				}
 				continue
 			}
 
@@ -97,4 +103,10 @@ func Process(prefix string, spec interface{}) error {
 		}
 	}
 	return nil
+}
+
+func MustProcess(prefix string, spec interface{}) {
+	if err := Process(prefix, spec); err != nil {
+		panic(err)
+	}
 }

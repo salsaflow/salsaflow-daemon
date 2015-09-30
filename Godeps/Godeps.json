@@ -20,13 +20,13 @@
 		},
 		{
 			"ImportPath": "github.com/kelseyhightower/envconfig",
-			"Comment": "v1.0.0-14-g43da5b7",
-			"Rev": "43da5b79aea0685e4559667d3c88a5cb19c460c5"
+			"Comment": "v1.0.0-26-g12c18e8",
+			"Rev": "12c18e8343f6eb5fc3a9d5c8dc353e42e6bb40b9"
 		},
 		{
 			"ImportPath": "github.com/salsaflow/salsaflow/github/issues",
-			"Comment": "v0.15.0",
-			"Rev": "e077d949cfdf2bc00cc276b6906bd8132e742b2c"
+			"Comment": "v0.15.1",
+			"Rev": "633094e3f5717dd69c43d50caa4bc4654935ecdd"
 		},
 		{
 			"ImportPath": "github.com/salsita/go-jira/v2/jira",
@@ -34,7 +34,8 @@
 		},
 		{
 			"ImportPath": "github.com/salsita/go-pivotaltracker/v5/pivotal",
-			"Rev": "0e662ae6d6f2f3b176b06fcf252b77327fb47327"
+			"Comment": "v1.1.0-3-g7951f05",
+			"Rev": "7951f05b21710594b53d9fd2bae815a957d60978"
 		},
 		{
 			"ImportPath": "github.com/tchap/oauth",
@@ -42,7 +43,7 @@
 		},
 		{
 			"ImportPath": "golang.org/x/net/context",
-			"Rev": "66f0418ca41253f8d1a024eb9754e9441a8e79b9"
+			"Rev": "7654728e381988afd88e58cabfd6363a5ea91810"
 		},
 		{
 			"ImportPath": "golang.org/x/oauth2",
