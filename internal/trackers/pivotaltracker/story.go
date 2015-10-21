@@ -44,6 +44,58 @@ func (s *commonStory) OnReviewRequestReopened(rrID, rrURL string) error {
 func (s *commonStory) MarkAsReviewed() error {
 	// Get PT config.
 	config := GetConfig()
+	qaLabel := testingLabel(s.story)
+
+	var (
+		newState  string
+		newLabels []*pivotal.Label
+	)
+
+	switch s.story.State {
+	case pivotal.StoryStateUnscheduled:
+		fallthrough
+	case pivotal.StoryStatePlanned:
+		fallthrough
+	case pivotal.StoryStateUnstarted:
+		fallthrough
+	case pivotal.StoryStateStarted:
+		fallthrough
+	case pivotal.StoryStateFinished:
+		fallthrough
+	case pivotal.StoryStateRejected:
+		// Set story state to finished.
+		newState = pivotal.StoryStateFinished
+
+		// Prune all workflow labels and add 'reviewed'.
+		newLabels = append(pruneLabels(s.story.Labels), &pivotal.Label{
+			Name: config.ReviewedLabel,
+		})
+
+	case pivotal.StoryStateDelivered:
+		// In case the story is delivered, we leave it that way.
+		newState = pivotal.StoryStateDelivered
+
+		// We make sure 'reviewed' label is there, but we also
+		// keep the testing label there unless it is 'qa-', in which case we drop it.
+		newLabels = append(pruneLabels(s.story.Labels), &pivotal.Label{
+			Name: config.ReviewedLabel,
+		})
+		switch qaLabel {
+		case config.TestingFailedLabel:
+			// Drop 'qa-' in case it is there.
+		case config.TestingPassedLabel:
+			// Keep 'qa+' in case it is there.
+			fallthrough
+		case config.TestingSkippedLabel:
+			// Keep 'no qa' in case it is there.
+			newLabels = append(newLabels, &pivotal.Label{
+				Name: qaLabel,
+			})
+		}
+
+	case pivotal.StoryStateAccepted:
+		newState = pivotal.StoryStateAccepted
+	}
 
 	// Prune workflow labels.
 	// Add the reviewed label.
@@ -98,4 +150,29 @@ func pruneLabels(labels []*pivotal.Label) []*pivotal.Label {
 		}
 	}
 	return ls
+}
+
+func isLabeled(story *pivotal.Story, labelName string) bool {
+	for _, label := range story.Labels {
+		if label.Name == labelName {
+			return true
+		}
+	}
+	return false
+}
+
+func testingLabel(story *pivotal.Story) string {
+	config := GetConfig()
+	qaLabels := [...]string{
+		config.TestingPassedLabel,
+		config.TestingFailedLabel,
+		config.TestingSkippedlabel,
+	}
+
+	for _, label := range labels {
+		if isLabeled(story, label) {
+			return label
+		}
+	}
+	return ""
 }
