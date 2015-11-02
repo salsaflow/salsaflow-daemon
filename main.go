@@ -32,8 +32,6 @@ func main() {
 	}
 	mux.Handle("/events/pivotaltracker", pivotaltracker.NewHandler(ptOptions...))
 
-	// Register JIRA testing handler.
-	mux.Handle("/jira/me", jira.NewMeHandler())
 
 	// Set up Negroni and start listening.
 	n := negroni.Classic()
