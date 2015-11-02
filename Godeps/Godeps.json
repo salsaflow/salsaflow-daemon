@@ -11,8 +11,13 @@
 			"Rev": "c7477ad8e330bef55bf1ebe300cf8aa67c492d1b"
 		},
 		{
+			"ImportPath": "github.com/fatih/color",
+			"Comment": "v0.1-8-g76d4231",
+			"Rev": "76d423163af754ff6423d2d9be0057fbf03c57c2"
+		},
+		{
 			"ImportPath": "github.com/google/go-github/github",
-			"Rev": "7277108aa3e8823e0e028f6c74aea2f4ce4a1b5a"
+			"Rev": "9420d0f48acb838ccf8a7f8dde9eaee19af71132"
 		},
 		{
 			"ImportPath": "github.com/google/go-querystring/query",
@@ -20,34 +25,49 @@
 		},
 		{
 			"ImportPath": "github.com/kelseyhightower/envconfig",
-			"Comment": "v1.0.0-26-g12c18e8",
-			"Rev": "12c18e8343f6eb5fc3a9d5c8dc353e42e6bb40b9"
+			"Comment": "v1.0.0-14-g43da5b7",
+			"Rev": "43da5b79aea0685e4559667d3c88a5cb19c460c5"
+		},
+		{
+			"ImportPath": "github.com/mattn/go-isatty",
+			"Rev": "7fcbc72f853b92b5720db4a6b8482be612daef24"
+		},
+		{
+			"ImportPath": "github.com/salsaflow/salsaflow/action",
+			"Comment": "v0.2.0-765-g85a8ee6",
+			"Rev": "85a8ee6267ee9693b09a695b4e3b9ebc3907aa42"
+		},
+		{
+			"ImportPath": "github.com/salsaflow/salsaflow/errs",
+			"Comment": "v0.2.0-765-g85a8ee6",
+			"Rev": "85a8ee6267ee9693b09a695b4e3b9ebc3907aa42"
 		},
 		{
 			"ImportPath": "github.com/salsaflow/salsaflow/github/issues",
-			"Comment": "v0.15.1",
-			"Rev": "633094e3f5717dd69c43d50caa4bc4654935ecdd"
+			"Comment": "v0.2.0-765-g85a8ee6",
+			"Rev": "85a8ee6267ee9693b09a695b4e3b9ebc3907aa42"
 		},
 		{
-			"ImportPath": "github.com/salsita/go-jira/v2/jira",
-			"Rev": "3565b0189c50f019c4419da570687a8073c3f5e3"
+			"ImportPath": "github.com/salsaflow/salsaflow/log",
+			"Comment": "v0.2.0-765-g85a8ee6",
+			"Rev": "85a8ee6267ee9693b09a695b4e3b9ebc3907aa42"
 		},
 		{
-			"ImportPath": "github.com/salsita/go-pivotaltracker/v5/pivotal",
-			"Comment": "v1.1.0-3-g7951f05",
-			"Rev": "7951f05b21710594b53d9fd2bae815a957d60978"
-		},
-		{
-			"ImportPath": "github.com/tchap/oauth",
-			"Rev": "d1214b4ac4b16fedaf83df0732fe80be9683bd96"
+			"ImportPath": "github.com/shiena/ansicolor",
+			"Rev": "d445752f6f66f9cd987722f109149f6799cdf1de"
 		},
 		{
 			"ImportPath": "golang.org/x/net/context",
-			"Rev": "7654728e381988afd88e58cabfd6363a5ea91810"
+			"Rev": "cd8c2701a5e10f044db915e65eac68f738399d22"
 		},
 		{
 			"ImportPath": "golang.org/x/oauth2",
-			"Rev": "397fe7649477ff2e8ced8fc0b2696f781e53745a"
+			"Rev": "ef4eca6b097fad7cec79afcc278d213a6de1c960"
+		},
+		{
+			"ImportPath": "gopkg.in/salsita/go-pivotaltracker.v1/v5/pivotal",
+			"Comment": "v1.3.1",
+			"Rev": "6f9f6c14977fb57a1a8ad00c0a150c90bfc71a20"
 		}
 	]
 }
