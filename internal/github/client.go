@@ -1,23 +1,18 @@
-package githubutils
+package github
 
 import (
-	// Stdlib
-	"os"
-
 	// Internal
-	"github.com/salsaflow/salsaflow-daemon/internal/env"
+	"github.com/salsaflow/salsaflow-daemon/internal/errs"
 
 	// Vendor
 	"github.com/google/go-github/github"
 	"golang.org/x/oauth2"
 )
 
-const EnvAccessToken = "GITHUB_ACCESS_TOKEN"
-
-func NewClient() (client *github.Client, err error) {
-	token := os.Getenv(EnvAccessToken)
+func NewClient() (*github.Client, error) {
+	token := GetConfig().Token
 	if token == "" {
-		return nil, &env.ErrNotSet{EnvAccessToken}
+		return nil, &errs.ErrVarNotSet{"SFD_GITHUB_TOKEN"}
 	}
 
 	httpClient := oauth2.NewClient(oauth2.NoContext, &tokenSource{token})
