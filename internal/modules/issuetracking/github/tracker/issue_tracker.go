@@ -1,4 +1,4 @@
-package github
+package tracker
 
 import (
 	// Stdlib
@@ -7,8 +7,8 @@ import (
 	"strconv"
 
 	// Internal
-	"github.com/salsaflow/salsaflow-daemon/internal/trackers/common"
-	"github.com/salsaflow/salsaflow-daemon/internal/utils/githubutils"
+	githubutil "github.com/salsaflow/salsaflow-daemon/internal/github"
+	"github.com/salsaflow/salsaflow-daemon/internal/modules/common"
 
 	// Vendor
 	"github.com/google/go-github/github"
@@ -17,10 +17,11 @@ import (
 const Id = "GitHub Issues"
 
 func Factory() (common.IssueTracker, error) {
-	client, err := githubutils.NewClient()
+	client, err := githubutil.NewClient()
 	if err != nil {
 		return nil, err
 	}
+
 	return &issueTracker{client}, nil
 }
 
