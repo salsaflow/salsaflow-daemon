@@ -1,8 +1,11 @@
-package pivotaltracker
+package tracker
 
 import (
 	// Stdlib
 	"fmt"
+
+	// Internal
+	"github.com/salsaflow/salsaflow-daemon/internal/modules/issuetracking/pivotaltracker/config"
 
 	// Vendor
 	"github.com/salsita/go-pivotaltracker/v5/pivotal"
@@ -42,15 +45,12 @@ func (s *commonStory) OnReviewRequestReopened(rrID, rrURL string) error {
 }
 
 func (s *commonStory) MarkAsReviewed() error {
-	// Get PT config.
-	config := GetConfig()
-
 	// Prune workflow labels.
 	// Add the reviewed label.
 	// Reset to finished.
 	state := pivotal.StoryStateFinished
 	labels := append(pruneLabels(s.story.Labels), &pivotal.Label{
-		Name: config.ReviewedLabel,
+		Name: config.Get().ReviewedLabel,
 	})
 
 	// Update the story.
@@ -84,13 +84,14 @@ func (s *commonStory) addComment(text string) error {
 }
 
 func pruneLabels(labels []*pivotal.Label) []*pivotal.Label {
+	cfg := config.Get()
 	ls := make([]*pivotal.Label, 0, len(labels))
 	for _, label := range labels {
 		switch label.Name {
-		case config.ReviewedLabel:
-		case config.ReviewSkippedLabel:
-		case config.TestingPassedLabel:
-		case config.TestingFailedLabel:
+		case cfg.ReviewedLabel:
+		case cfg.ReviewSkippedLabel:
+		case cfg.TestingPassedLabel:
+		case cfg.TestingFailedLabel:
 		default:
 			ls = append(ls, &pivotal.Label{
 				Id: label.Id,

@@ -1,4 +1,4 @@
-package pivotaltracker
+package tracker
 
 import (
 	// Stdlib
@@ -7,7 +7,8 @@ import (
 	"strings"
 
 	// Internal
-	"github.com/salsaflow/salsaflow-daemon/internal/trackers/common"
+	"github.com/salsaflow/salsaflow-daemon/internal/modules/common"
+	"github.com/salsaflow/salsaflow-daemon/internal/modules/issuetracking/pivotaltracker/config"
 
 	// Vendor
 	"github.com/salsita/go-pivotaltracker/v5/pivotal"
@@ -16,8 +17,7 @@ import (
 const Id = "Pivotal Tracker"
 
 func Factory() (common.IssueTracker, error) {
-	config := GetConfig()
-	return &issueTracker{pivotal.NewClient(config.Token)}, nil
+	return &issueTracker{pivotal.NewClient(config.Get().Token)}, nil
 }
 
 type issueTracker struct {
