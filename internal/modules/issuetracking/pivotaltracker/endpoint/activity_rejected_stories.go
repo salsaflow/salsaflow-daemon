@@ -1,4 +1,4 @@
-package pivotaltracker
+package endpoint
 
 import (
 	// Stdlib
@@ -6,7 +6,7 @@ import (
 
 	// Internal
 	"github.com/salsaflow/salsaflow-daemon/internal/log"
-	pt "github.com/salsaflow/salsaflow-daemon/internal/trackers/pivotaltracker"
+	"github.com/salsaflow/salsaflow-daemon/internal/modules/issuetracking/pivotaltracker/config"
 
 	// Vendor
 	"github.com/salsita/go-pivotaltracker/v5/pivotal"
@@ -23,11 +23,11 @@ func handleRejectedStories(r *http.Request, projectId int, change *Change) error
 
 	// Fetch the story resource.
 	var (
-		config = pt.GetConfig()
-		pid    = projectId
-		sid    = change.ResourceID
+		cfg = config.Get()
+		pid = projectId
+		sid = change.ResourceID
 	)
-	client := pivotal.NewClient(config.Token)
+	client := pivotal.NewClient(cfg.Token)
 	story, _, err := client.Stories.Get(pid, sid)
 	if err != nil {
 		return err
@@ -37,11 +37,11 @@ func handleRejectedStories(r *http.Request, projectId int, change *Change) error
 	var newLabels []*pivotal.Label
 	for _, label := range story.Labels {
 		switch label.Name {
-		case config.ReviewedLabel:
-		case config.ReviewSkippedLabel:
-		case config.TestingPassedLabel:
-		case config.TestingFailedLabel:
-		case config.TestingSkippedLabel:
+		case cfg.ReviewedLabel:
+		case cfg.ReviewSkippedLabel:
+		case cfg.TestingPassedLabel:
+		case cfg.TestingFailedLabel:
+		case cfg.TestingSkippedLabel:
 		default:
 			newLabels = append(newLabels, &pivotal.Label{Name: label.Name})
 		}

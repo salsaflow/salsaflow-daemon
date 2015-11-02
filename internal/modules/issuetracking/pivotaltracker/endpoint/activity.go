@@ -1,4 +1,4 @@
-package pivotaltracker
+package endpoint
 
 import (
 	// Stdlib
@@ -6,8 +6,8 @@ import (
 	"net/http"
 
 	// Internal
+	httputil "github.com/salsaflow/salsaflow-daemon/internal/http"
 	"github.com/salsaflow/salsaflow-daemon/internal/log"
-	"github.com/salsaflow/salsaflow-daemon/internal/utils/httputils"
 )
 
 type Activity struct {
@@ -37,7 +37,7 @@ func handleActivity(rw http.ResponseWriter, r *http.Request) {
 	// Decode the activity object.
 	var activity Activity
 	if err := json.NewDecoder(r.Body).Decode(&activity); err != nil {
-		httputils.Error(rw, r, err)
+		httputil.Error(rw, r, err)
 		return
 	}
 
@@ -55,8 +55,8 @@ func handleActivity(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	if errorOccured {
-		httputils.Status(rw, http.StatusInternalServerError)
+		httputil.Status(rw, http.StatusInternalServerError)
 	} else {
-		httputils.Status(rw, http.StatusAccepted)
+		httputil.Status(rw, http.StatusAccepted)
 	}
 }
