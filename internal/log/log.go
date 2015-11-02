@@ -22,8 +22,8 @@ func Warn(req *http.Request, format string, v ...interface{}) {
 	defaultLogger.Warn(req, format, v...)
 }
 
-func Error(req *http.Request, err error) {
-	defaultLogger.Error(req, err)
+func Error(req *http.Request, err error) error {
+	return defaultLogger.Error(req, err)
 }
 
 type Logger struct {
@@ -50,8 +50,9 @@ func (logger *Logger) Warn(req *http.Request, format string, v ...interface{}) {
 	logger.printRecord("WARNING", req, format, v...)
 }
 
-func (logger *Logger) Error(req *http.Request, err error) {
+func (logger *Logger) Error(req *http.Request, err error) error {
 	logger.printRecord("ERROR", req, err.Error())
+	return err
 }
 
 func (logger *Logger) printRecord(
