@@ -1,39 +1,31 @@
-package github
+package endpoint
 
 import (
 	// Stdlib
 	"bufio"
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"regexp"
 	"strings"
 
 	// Internal
+	"github.com/salsaflow/salsaflow-daemon/internal/github/events"
+	httputil "github.com/salsaflow/salsaflow-daemon/internal/http"
 	"github.com/salsaflow/salsaflow-daemon/internal/log"
-	"github.com/salsaflow/salsaflow-daemon/internal/utils/githubutils"
-	"github.com/salsaflow/salsaflow-daemon/internal/utils/httputils"
 
 	// Vendor
 	"github.com/google/go-github/github"
 	"github.com/salsaflow/salsaflow/github/issues"
 )
 
-type commitCommentEvent struct {
-	Comment    *github.RepositoryComment `json:"comment"`
-	Repository *github.Repository        `json:"repository"`
-}
-
-func handleCommitComment(rw http.ResponseWriter, r *http.Request) {
-	// Parse the payload.
-	var event commitCommentEvent
-	if err := json.NewDecoder(r.Body).Decode(&event); err != nil {
-		log.Warn(r, "failed to parse event: %v", err)
-		httputils.Status(rw, http.StatusBadRequest)
-		return
-	}
-
+// HandleCommitCommentEvent implements events.CommitCommentEventHandler
+// and it is used to handle GitHub commit_comment events.
+func (handler *eventHandler) HandleCommitCommentEvent(
+	rw http.ResponseWriter,
+	r *http.Request,
+	event *events.CommitCommentEvent,
+) {
 	// A command is always placed at the beginning of the line
 	// and it is prefixed with '!'.
 	cmdRegexp := regexp.MustCompile("^[!]([a-zA-Z]+) (.*)$")
@@ -51,27 +43,27 @@ func handleCommitComment(rw http.ResponseWriter, r *http.Request) {
 		var err error
 		switch cmd {
 		case "mustfix":
-			err = createReviewBlockerFromCommitComment(
+			err = handler.createReviewBlockerFromCommitComment(
 				r,
-				*event.Repository.Owner.Login,
-				*event.Repository.Name,
+				*event.Repo.Owner.Login,
+				*event.Repo.Name,
 				event.Comment,
 				arg)
 		}
 		if err != nil {
-			httputils.Error(rw, r, err)
+			httputil.Error(rw, r, err)
 			return
 		}
 	}
 	if err := scanner.Err(); err != nil {
-		httputils.Error(rw, r, err)
+		httputil.Error(rw, r, err)
 		return
 	}
 
-	httputils.Status(rw, http.StatusAccepted)
+	httputil.Status(rw, http.StatusAccepted)
 }
 
-func createReviewBlockerFromCommitComment(
+func (handler *eventHandler) createReviewBlockerFromCommitComment(
 	r *http.Request,
 	owner string,
 	repo string,
@@ -79,16 +71,11 @@ func createReviewBlockerFromCommitComment(
 	blockerSummary string,
 ) error {
 
-	// Get GitHub API client.
-	client, err := githubutils.NewClient()
-	if err != nil {
-		return err
-	}
-
 	// Find the right review issue.
 	//
 	// We search the content of all review issues for the right commit hash.
 	var (
+		client        = handler.client
 		commitSHA     = *comment.CommitID
 		commentURL    = *comment.HTMLURL
 		commentAuthor = *comment.User.Login

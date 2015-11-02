@@ -1,41 +1,35 @@
-package github
+package endpoint
 
 import (
 	// Stdlib
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
 
 	// Internal
+	githubutil "github.com/salsaflow/salsaflow-daemon/internal/github"
+	"github.com/salsaflow/salsaflow-daemon/internal/github/events"
+	httputil "github.com/salsaflow/salsaflow-daemon/internal/http"
 	"github.com/salsaflow/salsaflow-daemon/internal/log"
-	"github.com/salsaflow/salsaflow-daemon/internal/trackers"
-	"github.com/salsaflow/salsaflow-daemon/internal/utils/githubutils"
-	"github.com/salsaflow/salsaflow-daemon/internal/utils/httputils"
+	"github.com/salsaflow/salsaflow-daemon/internal/modules"
 
 	// Vendor
 	"github.com/google/go-github/github"
 	"github.com/salsaflow/salsaflow/github/issues"
 )
 
-func handleIssuesEvent(rw http.ResponseWriter, r *http.Request) {
-	// Parse the payload.
-	var event github.IssueActivityEvent
-	if err := json.NewDecoder(r.Body).Decode(&event); err != nil {
-		log.Warn(r, "failed to parse event: %v", err)
-		httputils.Status(rw, http.StatusBadRequest)
-		return
-	}
-
+// HandleCommitCommentEvent implements events.IssuesEventHandler
+// and it is used to handle GitHub issues events.
+func (handler *eventHandler) HandleIssuesEvent(
+	rw http.ResponseWriter,
+	r *http.Request,
+	event *events.IssuesEvent,
+) {
 	// Make sure this is a review issue event.
 	// The label is sometimes missing in the webhook, we need to re-fetch.
-	client, err := githubutils.NewClient()
-	if err != nil {
-		httputils.Error(rw, r, err)
-		return
-	}
 	var (
+		client   = handler.client
 		owner    = *event.Repo.Owner.Login
 		repo     = *event.Repo.Name
 		issueNum = *event.Issue.Number
@@ -43,23 +37,13 @@ func handleIssuesEvent(rw http.ResponseWriter, r *http.Request) {
 	log.Info(r, "Re-fetching issue %v/%v#%v", owner, repo, issueNum)
 	issue, _, err := client.Issues.Get(owner, repo, issueNum)
 	if err != nil {
-		httputils.Error(rw, r, err)
+		httputil.Error(rw, r, err)
 		return
 	}
 
-	// Make sure this is a review issue.
-	labeledWith := func(label string) bool {
-		for _, labelPtr := range issue.Labels {
-			if *labelPtr.Name == label {
-				return true
-			}
-		}
-		return false
-	}
-
-	if !labeledWith("review") {
+	if !githubutil.LabeledWith(issue, "review") {
 		log.Info(r, "Issue %s is not a review issue", *issue.HTMLURL)
-		httputils.Status(rw, http.StatusAccepted)
+		httputil.Status(rw, http.StatusAccepted)
 		return
 	}
 
@@ -68,14 +52,14 @@ func handleIssuesEvent(rw http.ResponseWriter, r *http.Request) {
 	case "opened":
 	case "closed":
 		// Make sure the issue is marked as implemented.
-		if !labeledWith("implemented") {
-			rejectClose(rw, r, client, &event)
+		if !githubutil.LabeledWith(issue, "implemented") {
+			rejectClose(rw, r, client, event)
 			return
 		}
 
 	case "reopened":
 	default:
-		httputils.Status(rw, http.StatusAccepted)
+		httputil.Status(rw, http.StatusAccepted)
 		return
 	}
 
@@ -83,22 +67,22 @@ func handleIssuesEvent(rw http.ResponseWriter, r *http.Request) {
 	reviewIssue, err := issues.ParseReviewIssue(issue)
 	if err != nil {
 		log.Error(r, err)
-		httputils.Status(rw, httputils.StatusUnprocessableEntity)
+		httputil.Status(rw, httputil.StatusUnprocessableEntity)
 		return
 	}
 
 	// We are done in case this is a commit review issue.
 	storyIssue, ok := reviewIssue.(*issues.StoryReviewIssue)
 	if !ok {
-		httputils.Status(rw, http.StatusAccepted)
+		httputil.Status(rw, http.StatusAccepted)
 		return
 	}
 
 	// Instantiate the issue tracker.
-	tracker, err := trackers.GetIssueTracker(storyIssue.TrackerName)
+	tracker, err := modules.GetIssueTracker(storyIssue.TrackerName)
 	if err != nil {
 		log.Error(r, err)
-		httputils.Status(rw, httputils.StatusUnprocessableEntity)
+		httputil.Status(rw, httputil.StatusUnprocessableEntity)
 		return
 	}
 
@@ -106,7 +90,7 @@ func handleIssuesEvent(rw http.ResponseWriter, r *http.Request) {
 	story, err := tracker.FindStoryByTag(storyIssue.StoryKey)
 	if err != nil {
 		log.Error(r, err)
-		httputils.Status(rw, httputils.StatusUnprocessableEntity)
+		httputil.Status(rw, httputil.StatusUnprocessableEntity)
 		return
 	}
 
@@ -127,26 +111,26 @@ func handleIssuesEvent(rw http.ResponseWriter, r *http.Request) {
 		panic("unreachable code reached")
 	}
 	if ex != nil {
-		httputils.Error(rw, r, ex)
+		httputil.Error(rw, r, ex)
 		return
 	}
 
 	if *event.Action == "closed" {
 		if err := story.MarkAsReviewed(); err != nil {
-			httputils.Error(rw, r, err)
+			httputil.Error(rw, r, err)
 			return
 		}
 	}
 
-	httputils.Status(rw, http.StatusAccepted)
+	httputil.Status(rw, http.StatusAccepted)
 }
 
 func rejectClose(
 	rw http.ResponseWriter,
 	r *http.Request,
 	client *github.Client,
-	event *github.IssueActivityEvent) {
-
+	event *events.IssuesEvent,
+) {
 	var (
 		owner    = *event.Repo.Owner.Login
 		repo     = *event.Repo.Name
@@ -162,7 +146,7 @@ func rejectClose(
 		State: github.String("open"),
 	})
 	if err != nil {
-		httputils.Error(rw, r, err)
+		httputil.Error(rw, r, err)
 		return
 	}
 
@@ -178,9 +162,9 @@ func rejectClose(
 		Body: github.String(body.String()),
 	})
 	if err != nil {
-		httputils.Error(rw, r, err)
+		httputil.Error(rw, r, err)
 		return
 	}
 
-	httputils.Status(rw, http.StatusAccepted)
+	httputil.Status(rw, http.StatusAccepted)
 }
