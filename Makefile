@@ -12,4 +12,5 @@ godep-test: internal.test
 internal.test:
 	${CMD} \
 		github.com/salsaflow/salsaflow-daemon/internal/modules/codereview/github/endpoint \
-		github.com/salsaflow/salsaflow-daemon/internal/modules/issuetracking/github/endpoint
+		github.com/salsaflow/salsaflow-daemon/internal/modules/issuetracking/github/endpoint \
+		github.com/salsaflow/salsaflow-daemon/internal/modules/issuetracking/pivotaltracker/tracker

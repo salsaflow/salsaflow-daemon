@@ -10,7 +10,7 @@ import (
 
 type Config struct {
 	WebhookSecret string `envconfig:"WEBHOOK_SECRET"`
-	Token         string `envconfig:"TOKEN" required:"true"`
+	Token         string `envconfig:"TOKEN"`
 
 	ReviewedLabel       string `envconfig:"REVIEWED_LABEL"        default:"reviewed"`
 	ReviewSkippedLabel  string `envconfig:"EVIEW_SKIPPED_LABEL"  default:"no review"`
