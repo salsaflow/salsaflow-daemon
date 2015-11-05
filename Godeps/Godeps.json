@@ -25,32 +25,42 @@
 		},
 		{
 			"ImportPath": "github.com/kelseyhightower/envconfig",
-			"Comment": "v1.0.0-14-g43da5b7",
-			"Rev": "43da5b79aea0685e4559667d3c88a5cb19c460c5"
+			"Comment": "v1.0.0-26-g12c18e8",
+			"Rev": "12c18e8343f6eb5fc3a9d5c8dc353e42e6bb40b9"
 		},
 		{
 			"ImportPath": "github.com/mattn/go-isatty",
 			"Rev": "7fcbc72f853b92b5720db4a6b8482be612daef24"
 		},
 		{
+			"ImportPath": "github.com/onsi/ginkgo",
+			"Comment": "v1.2.0-22-g39d2c24",
+			"Rev": "39d2c24f8a92c88f7e7f4d8ec6c80d3cc8f5ac65"
+		},
+		{
+			"ImportPath": "github.com/onsi/gomega",
+			"Comment": "v1.0-71-g2152b45",
+			"Rev": "2152b45fa28a361beba9aab0885972323a444e28"
+		},
+		{
 			"ImportPath": "github.com/salsaflow/salsaflow/action",
-			"Comment": "v0.2.0-765-g85a8ee6",
-			"Rev": "85a8ee6267ee9693b09a695b4e3b9ebc3907aa42"
+			"Comment": "v0.16.3",
+			"Rev": "29d0320f790c0d2a3a9675debc6913d030f38287"
 		},
 		{
 			"ImportPath": "github.com/salsaflow/salsaflow/errs",
-			"Comment": "v0.2.0-765-g85a8ee6",
-			"Rev": "85a8ee6267ee9693b09a695b4e3b9ebc3907aa42"
+			"Comment": "v0.16.3",
+			"Rev": "29d0320f790c0d2a3a9675debc6913d030f38287"
 		},
 		{
 			"ImportPath": "github.com/salsaflow/salsaflow/github/issues",
-			"Comment": "v0.2.0-765-g85a8ee6",
-			"Rev": "85a8ee6267ee9693b09a695b4e3b9ebc3907aa42"
+			"Comment": "v0.16.3",
+			"Rev": "29d0320f790c0d2a3a9675debc6913d030f38287"
 		},
 		{
 			"ImportPath": "github.com/salsaflow/salsaflow/log",
-			"Comment": "v0.2.0-765-g85a8ee6",
-			"Rev": "85a8ee6267ee9693b09a695b4e3b9ebc3907aa42"
+			"Comment": "v0.16.3",
+			"Rev": "29d0320f790c0d2a3a9675debc6913d030f38287"
 		},
 		{
 			"ImportPath": "github.com/shiena/ansicolor",
