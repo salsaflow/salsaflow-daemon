@@ -26,7 +26,7 @@ import (
 // in the events package.
 //
 // In case the event handler does not implement the method for the event type
-// received, WebhookHandler simply returns 201 Accepted and does nothing.
+// received, WebhookHandler simply returns 202 Accepted and does nothing.
 type WebhookHandler struct {
 	// Embedded http.Handler
 	http.Handler
@@ -133,7 +133,7 @@ func getEventHandler(eventType string, eventHandler interface{}) http.Handler {
 	}
 
 	// Check whether eventHandler implements the right interface.
-	// In case this is not the case, we simply return 201 Accepted.
+	// In case this is not the case, we simply return 202 Accepted.
 	if !spec.isHandlerCompatible(eventHandler) {
 		return http.HandlerFunc(accepted)
 	}
