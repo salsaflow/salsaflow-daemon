@@ -19,7 +19,7 @@ import (
 	"github.com/salsaflow/salsaflow/github/issues"
 )
 
-// HandleCommitCommentEvent implements events.IssuesEventHandler
+// HandleIssuesEvent implements events.IssuesEventHandler
 // and it is used to handle GitHub issues events.
 func (handler *eventHandler) HandleIssuesEvent(
 	rw http.ResponseWriter,
