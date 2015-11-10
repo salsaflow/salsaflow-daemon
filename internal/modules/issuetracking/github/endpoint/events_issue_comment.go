@@ -92,5 +92,5 @@ func (handler *eventHandler) rejectIssue(
 		repo   = *event.Repo.Name
 		labels = []string{config.Get().RejectedLabel}
 	)
-	return util.ReplaceWorkflowLabels(handler.client, owner, repo, issue, labels)
+	return util.ReplaceWorkflowLabels(handler.client, owner, repo, issue, labels, nil)
 }

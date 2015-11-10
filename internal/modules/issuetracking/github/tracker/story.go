@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	// Internal
+	githubutil "github.com/salsaflow/salsaflow-daemon/internal/github"
 	"github.com/salsaflow/salsaflow-daemon/internal/modules/issuetracking/github/config"
 	"github.com/salsaflow/salsaflow-daemon/internal/modules/issuetracking/github/util"
 
@@ -28,11 +29,37 @@ func (s *commonStory) OnReviewRequestClosed(rrID, rrURL string) error {
 }
 
 func (s *commonStory) OnReviewRequestReopened(rrID, rrURL string) error {
-	return s.setStateLabel(config.Get().BeingImplementedLabel)
+	// Add 'implemented' unless 'qa+' or 'no qa' is there already.
+	var (
+		c    = config.Get()
+		add  []string
+		keep []string
+	)
+	switch {
+	case githubutil.LabeledWith(s.issue, c.PassedTestingLabel):
+		keep = []string{c.PassedTestingLabel}
+	case githubutil.LabeledWith(s.issue, c.SkipTestingLabel):
+		keep = []string{c.SkipTestingLabel}
+	default:
+		add = []string{c.ImplementedLabel}
+	}
+	return s.updateStateLabels(add, keep)
 }
 
 func (s *commonStory) MarkAsReviewed() error {
-	return s.setStateLabel(config.Get().ReviewedLabel)
+	// Add 'reviewed', but also keep 'qa+' and 'no qa'.
+	var (
+		c    = config.Get()
+		add  = []string{c.ReviewedLabel}
+		keep []string
+	)
+	switch {
+	case githubutil.LabeledWith(s.issue, c.PassedTestingLabel):
+		keep = []string{c.PassedTestingLabel}
+	case githubutil.LabeledWith(s.issue, c.SkipTestingLabel):
+		keep = []string{c.SkipTestingLabel}
+	}
+	return s.updateStateLabels(add, keep)
 }
 
 func (s *commonStory) addComment(text string) error {
@@ -48,6 +75,6 @@ func (s *commonStory) addComment(text string) error {
 	return err
 }
 
-func (s *commonStory) setStateLabel(label string) error {
-	return util.ReplaceWorkflowLabels(s.client, s.owner, s.repo, s.issue, []string{label})
+func (s *commonStory) updateStateLabels(add, keep []string) error {
+	return util.ReplaceWorkflowLabels(s.client, s.owner, s.repo, s.issue, add, keep)
 }

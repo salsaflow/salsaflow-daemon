@@ -13,25 +13,41 @@ func ReplaceWorkflowLabels(
 	owner string,
 	repo string,
 	issue *github.Issue,
-	labels []string,
+	add []string,
+	keep []string,
 ) error {
 	// Get the list of labels to be used.
-	cfg := config.Get()
-	labelNames := make([]string, 0, len(issue.Labels)+len(labels))
-	labelNames = append(labelNames, labels...)
+	shouldKeep := func(label string) bool {
+		for _, keepName := range keep {
+			if keepName == label {
+				return true
+			}
+		}
+		return false
+	}
+
+	c := config.Get()
+	labelNames := make([]string, 0, len(issue.Labels)+len(add))
+	labelNames = append(labelNames, add...)
 	for _, label := range issue.Labels {
 		name := *label.Name
+
+		if shouldKeep(name) {
+			labelNames = append(labelNames, name)
+			continue
+		}
+
 		switch name {
-		case cfg.ApprovedLabel:
-		case cfg.BeingImplementedLabel:
-		case cfg.ImplementedLabel:
-		case cfg.ReviewedLabel:
-		case cfg.SkipReviewLabel:
-		case cfg.PassedTestingLabel:
-		case cfg.FailedTestingLabel:
-		case cfg.SkipTestingLabel:
-		case cfg.StagedLabel:
-		case cfg.RejectedLabel:
+		case c.ApprovedLabel:
+		case c.BeingImplementedLabel:
+		case c.ImplementedLabel:
+		case c.ReviewedLabel:
+		case c.SkipReviewLabel:
+		case c.PassedTestingLabel:
+		case c.FailedTestingLabel:
+		case c.SkipTestingLabel:
+		case c.StagedLabel:
+		case c.RejectedLabel:
 		default:
 			labelNames = append(labelNames, name)
 		}

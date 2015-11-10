@@ -65,7 +65,8 @@ func (handler *eventHandler) onIssueClosed(
 		owner = *event.Repo.Owner.Login
 		repo  = *event.Repo.Name
 	)
-	if err := util.ReplaceWorkflowLabels(handler.client, owner, repo, issue, nil); err != nil {
+	err := util.ReplaceWorkflowLabels(handler.client, owner, repo, issue, nil, nil)
+	if err != nil {
 		httputil.Error(rw, r, err)
 	} else {
 		httputil.Status(rw, http.StatusAccepted)
@@ -85,7 +86,8 @@ func (handler *eventHandler) onIssueReopened(
 		repo   = *event.Repo.Name
 		labels = []string{config.Get().BeingImplementedLabel}
 	)
-	if err := util.ReplaceWorkflowLabels(handler.client, owner, repo, issue, labels); err != nil {
+	err := util.ReplaceWorkflowLabels(handler.client, owner, repo, issue, labels, nil)
+	if err != nil {
 		httputil.Error(rw, r, err)
 	} else {
 		httputil.Status(rw, http.StatusAccepted)

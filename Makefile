@@ -1,7 +1,10 @@
-.PHONY: test godep_test
+.PHONY: install test godep_test
 
 TEST=go test -v
 GODEP_TEST= godep go test -v
+
+install:
+	go install github.com/salsaflow/salsaflow-daemon
 
 test: CMD=go test -v
 test: internal.test
