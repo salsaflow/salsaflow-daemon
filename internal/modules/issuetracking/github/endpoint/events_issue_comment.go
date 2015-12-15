@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	// Internal
-	githubutil "github.com/salsaflow/salsaflow-daemon/internal/github"
 	"github.com/salsaflow/salsaflow-daemon/internal/github/events"
 	httputil "github.com/salsaflow/salsaflow-daemon/internal/http"
 	"github.com/salsaflow/salsaflow-daemon/internal/log"
@@ -40,7 +39,7 @@ func (handler *eventHandler) HandleIssueCommentEvent(
 	}
 
 	// Make sure this is a story issue.
-	if !githubutil.LabeledWith(issue, config.Get().StoryLabel) {
+	if !isStoryIssue(issue, config.Get()) {
 		log.Info(r, "Issue %v is not a story issue, skipping", *issue.HTMLURL)
 		return
 	}

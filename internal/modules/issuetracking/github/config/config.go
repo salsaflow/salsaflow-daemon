@@ -3,6 +3,7 @@ package config
 import (
 	// Stdlib
 	"log"
+	"strings"
 
 	// Vendor
 	"github.com/kelseyhightower/envconfig"
@@ -10,7 +11,10 @@ import (
 
 type Config struct {
 	// Story label.
-	StoryLabel string `envconfig:"STORY_LABEL" default:"story"`
+	StoryLabelList string `envconfig:"STORY_LABELS" default:"enhancement,bug"`
+
+	// StoryLabels contains parsed StoryLabelList.
+	StoryLabels []string
 
 	// State labels.
 	ApprovedLabel         string `envconfig:"APPROVED_LABEL"          default:"approved"`
@@ -31,6 +35,16 @@ func init() {
 	if err := envconfig.Process("SFD_GITHUB", &config); err != nil {
 		log.Fatalln("Fatal error while parsing GitHub config:", err)
 	}
+
+	mp := func(xs []string, mapFunc func(string) string) []string {
+		ss := make([]string, len(xs))
+		for i, x := range xs {
+			ss[i] = mapFunc(x)
+		}
+		return ss
+	}
+
+	config.StoryLabels = mp(strings.Split(config.StoryLabelList, ","), strings.TrimSpace)
 }
 
 func Get() Config {
