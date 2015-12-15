@@ -1,7 +1,6 @@
 dependencies:
   pre:
     - "go get github.com/tools/godep"
-    - "godep restore"
 test:
   override:
-    - "make test"
+    - 'GOPATH="$(godep path):$GOPATH" make test'
