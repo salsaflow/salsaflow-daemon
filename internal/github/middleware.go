@@ -6,6 +6,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha1"
 	"encoding/hex"
+	"encoding/json"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -16,6 +17,7 @@ import (
 
 	// Vendor
 	"github.com/codegangsta/negroni"
+	"github.com/google/go-github/github"
 )
 
 func newSecretMiddleware(secret string) negroni.HandlerFunc {
@@ -43,8 +45,9 @@ func newSecretMiddleware(secret string) negroni.HandlerFunc {
 			secretHeader := r.Header.Get("X-Hub-Signature")
 			expected := "sha1=" + hex.EncodeToString(mac.Sum(nil))
 			if secretHeader != expected {
-				log.Warn(r, "HMAC mismatch detected: expected='%v', got='%v'\n",
-					expected, secretHeader)
+				repo := getRepoFullName(bodyBytes)
+				log.Warn(r, "HMAC mismatch detected (repo='%v'): expected='%v', got='%v'\n",
+					repo, expected, secretHeader)
 				httputil.Status(rw, http.StatusUnauthorized)
 				return
 			}
@@ -52,4 +55,12 @@ func newSecretMiddleware(secret string) negroni.HandlerFunc {
 			// Call the next handler.
 			next(rw, r)
 		})
+}
+
+func getRepoFullName(body []byte) string {
+	var payload github.WebHookPayload
+	if err := json.Unmarshal(body, &payload); err != nil {
+		return ""
+	}
+	return *payload.Repo.FullName
 }
